@@ -61,6 +61,10 @@ function QuadricNormalizer(Q)
     Cs := QuadricCoefficients(TransformForm(Q, T0 : contra := true));
     a := Cs[2,2]; b := Cs[1,2]; c := Cs[2,3]; d := Cs[1,1]; e := Cs[1,3]; f := Cs[3,3];
     delta := (a*d - 1/4*b^2);
+    // Do we have any trouble ?
+    if not ( IsUnit(a) and IsUnit(delta) ) then
+	return Matrix([ [0, 0, 0], [0, 0, 0],  [0, 0, 0] ]);
+    end if;
     N := (a*e - 1/2*b*c);
     Delta := (a*d*f - 1/4*a*e^2 - 1/4*b^2*f + 1/4*b*c*e - 1/4*c^2*d);
     test, r := IsSquare(-a*Delta);

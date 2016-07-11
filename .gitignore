@@ -1,5 +1,8 @@
 .svn/*
 calculations/*
 experiments/*
+extended/*
 g3twists_v1-1/*
+g3twists_v2-0/*
 *.sig
+*.swp
