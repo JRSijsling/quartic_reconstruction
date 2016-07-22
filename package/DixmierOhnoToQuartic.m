@@ -185,8 +185,9 @@ function HyperellipticPolynomialFromJointShiodaInvariants(JS)
 	    bs[Idx[i]] := Parent(s2)!IthJointInvariant(S8S4Cov, [0*b8, b8], Idx[i]);
 	end if;
     end for;
-    vprint Reconstruction, 2 : "Joint Shioda Invariants of b8:",
-    [Parent(s2)!IthJointInvariant(S8S4Cov, [0*b8, b8], i) : i in [1..9]];
+    vprint Reconstruction, 2 :
+	"Joint Shioda Invariants of b8 in used:",
+	[ [* i, bs[Idx[i]] *] : i in [1..#Idx] | C[i] ne 0 ];
 
     vprint Reconstruction : "Recovering the twisting scalar...";
     /* Recovering the twisting scalar */
@@ -219,8 +220,8 @@ function HyperellipticPolynomialFromJointShiodaInvariants(JS)
     end if;
 
     vprint Reconstruction : "An extension of the base field of the binary octic was required to obtain the twisting scalar.";
-    vprint Reconstruction : "Twisting scalar:", Kl.1;
-    return (PolynomialRing(Kl)!b8), Kl.1;
+    vprint Reconstruction : "Twisting scalar:", 1/Kl.1;
+    return (PolynomialRing(Kl)!b8), 1/Kl.1;
 
 end function;
 
