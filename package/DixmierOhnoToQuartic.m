@@ -39,6 +39,8 @@ import "TernaryForms.m": TernaryToBinary, BinaryToTernary, Homogenization;
 import "JointCovariants.dat": S8S4Cov;
 import "JointCovariants.m": IthJointInvariant, JointCovariant;
 import "Interpolations.m": JointInvariantFromDixmierOhno;
+import "Descent.m": Descent;
+import "WPSMinimizeQQ.m": WPSMinimizeQQ;
 
 forward TernaryQuarticFromDixmierOhnoInvariants;
 forward XGCDUnique;
@@ -62,35 +64,49 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false) 
     vprint Reconstruction : "Determining joint Shioda invariants from Dixmier-Ohno invariants...";
     JointShioda := DixmierOhnoToJointShioda(DO);
     vprint Reconstruction, 2 : "Joint Shioda invariants:", JointShioda;
+    if Parent(DO[1]) eq Rationals() then
+        //JointShioda, lambda1 := WPSMinimizeQQ([2..10], JointShioda);
+        //vprint Reconstruction, 2 : "Joint Shioda invariants after minimization:", JointShioda;
+        lambda1 := 1;
+    else
+        lambda1 := 1;
+    end if;
 
     vprint Reconstruction : "Reconstructing binary octic b_8...";
-    B8, lbd := HyperellipticPolynomialFromJointShiodaInvariants(JointShioda);
-    if B8 eq 0 then
-	error "[DixmierOhnoToQuartic] B8 has a root of order >= 4, not yet implemented";
+    b8, lambda2 := HyperellipticPolynomialFromJointShiodaInvariants(JointShioda);
+    if b8 eq 0 then
+	error "[DixmierOhnoToQuartic] b_8 has a root of order >= 4, not yet implemented";
     end if;
-    vprint Reconstruction, 2 : "Reconstructed binary octic b_8:", lbd * Homogenization(B8 : degree := 8);
+
+    // Note: the lamdba here usually makes things considerably smaller.
+    vprint Reconstruction, 2 : "Reconstructed binary octic b_8:", lambda2 * Homogenization(b8 : degree := 8);
 
     vprint Reconstruction : "Reconstructing binary octic b_4...";
-    B4 := DixmierOhnoToBinaryQuartic(DO, lbd*B8);
-    vprint Reconstruction, 2 : "Reconstructed binary quartic b_4:", Homogenization(B4 : degree := 4);
+    b4 := DixmierOhnoToBinaryQuartic(DO, lambda2*b8);
+    vprint Reconstruction, 2 : "Reconstructed binary quartic b_4:", Homogenization(b4 : degree := 4);
 
-    S := PolynomialRing(CoefficientRing(B4), 2);
-    B8h := S ! Homogenization(B8 : degree := 8) * lbd;
-    B4h := S ! Homogenization(B4 : degree := 4);
-    B0h := S ! DO[3];
-    vprint Reconstruction, 2 : "Reconstructed constant b_0:", B0h;
+    S := PolynomialRing(CoefficientRing(b4), 2);
+    b8h := S ! Homogenization(b8 : degree := 8) * lambda2;
+    b4h := S ! Homogenization(b4 : degree := 4);
+    b0h := S ! DO[3];
+    vprint Reconstruction, 2 : "Reconstructed constant b_0:", b0h;
 
     vprint Reconstruction : "Final inversion...";
     F := Parent(DO[1]);
     // Get it to the base field if possible:
-    if &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ B8h, B4h, B0h ] ] ) then
+    if &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ b8h, b4h, b0h ] ] ) then
         R<x1, x2, x3> := PolynomialRing(F, 3);
+        f := R ! BinaryToTernary([b8h, b4h, b0h]);
     else
-        R<x1, x2, x3> := PolynomialRing(BaseRing(Parent(B8h)), 3);
+        R<x1, x2, x3> := PolynomialRing(BaseRing(Parent(b8h)), 3);
+        f := R ! BinaryToTernary([b8h, b4h, b0h]);
+        vprint Reconstruction : "Descending...";
+        R<x1, x2, x3> := PolynomialRing(F, 3);
+        f := R ! Descent(f, b8);
     end if;
-    f := R ! BinaryToTernary([B8h, B4h, B0h]);
+
     if not exact then
-        return f, [B8h, B4h, B0h];
+        return f, TernaryToBinary(f);
     else
         //if DO[1] ne 0 then
         if false then
@@ -257,7 +273,7 @@ function DixmierOhnoToJointShioda(DO)
 end function;
 
 
-function DixmierOhnoToBinaryQuartic(DO, b8);
+function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
 
     LEQ := []; _Precomputations := [];
     I03,I06,I09,J09,I12,J12,I15,J15,I18,J18,I21,J21,I27 := Explode(DO);
@@ -277,9 +293,10 @@ function DixmierOhnoToBinaryQuartic(DO, b8);
 
     LinearJointInvsNames := [ "j3", "j4c", "j5e", "j5f", "j6h", "j6i" ];
     LinearJointInvsIndices := [ 74, 79, 85, 86, 95, 96 ];
+    LinearJointInvsWeights := [ 3, 4, 5, 5, 6, 6 ];
 
     for i:=1 to #LinearJointInvsNames do
-        inv := JointInvariantFromDixmierOhno(LinearJointInvsNames[i], DO);
+        inv := lambda^(LinearJointInvsWeights[i]) * JointInvariantFromDixmierOhno(LinearJointInvsNames[i], DO);
         COV,_Precomputations := JointCovariant(S8S4Cov, [B4,B8], LinearJointInvsIndices[i] : Precomputations :=_Precomputations);
         Append(~LEQ,Pa!(COV[1])-inv);
     end for;
@@ -299,6 +316,8 @@ function DixmierOhnoToBinaryQuartic(DO, b8);
 	    return Parent(b8)![a0, a1, a2, a3, a4];
 	end if;
     end if;
+
+    /* TODO: Lambda. */
 
     /* Strange situation, we try to add degree 2 constraints */
     vprint Reconstruction : "Adding more, non-linear, constraints...";

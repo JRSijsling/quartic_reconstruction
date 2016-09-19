@@ -145,3 +145,17 @@ function BinaryToTernary(bs);
     f := &+[ w[1, i] * monst[i] : i in [1..15] ];
     return f;
 end function;
+
+
+function ConjugateForm(sigma, f);
+
+return &+[ sigma(MonomialCoefficient(f, mon)) * mon : mon in Monomials(f) ];
+
+end function;
+
+
+function ConjugateMatrix(sigma, M);
+
+return Matrix([ [ sigma(c) : c in Eltseq(row) ] : row in Rows(M) ]);
+
+end function;
