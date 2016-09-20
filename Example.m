@@ -28,7 +28,7 @@ SetVerbose("G3Twists", 1);
 SetVerbose("Reconstruction", 2);
 
 /* Start from a random ternary quartic */
-F := Rationals();  B := 1; Domain := [-B..B];
+F := Rationals();  B := 2^6; Domain := [-B..B];
 //F := GF(NextPrime(10^5));  Domain := F;
 R<x1, x2, x3> := PolynomialRing(F, 3);
 repeat

@@ -4,7 +4,8 @@
   JointCovariants.dat
   JointCovariants.m
   Interpolations.m
-  Descent.m
+  AutStrataChar0.m
   WPSMinimizeQQ.m
+  Descent.m
   DixmierOhnoToQuartic.m
 }
