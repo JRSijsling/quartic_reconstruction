@@ -24,8 +24,6 @@ SetVerbose("Reconstruction", n);
 
 where n is either 1 or 2. A higher value gives more comments.
 
-When reconstructing over the rationals, you may want to run Michael Stoll's MinimizeReducePlaneQuartic function on the output.
-
 Citing this code
 ----------------
 
