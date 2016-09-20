@@ -32,6 +32,7 @@
  */
 
 import "TernaryForms.m": Homogenization, Dehomogenization;
+import "JointCovariants.dat": S8S4Cov;
 
 /* A covariant (U, V)^level */
 COV_t :=  recformat<
@@ -241,4 +242,11 @@ function IthJointInvariant(FdCov, forms, idx)
     end for;
 
     return Inv, Deg;
+end function;
+
+
+function JointShiodaInvariants(f);
+
+return FirstJointInvariants(S8S4Cov, [0, f], 9), [2..10];
+
 end function;

@@ -23,7 +23,7 @@
 
 AttachSpec("package/spec");
 AttachSpec("g3twists_v2-0/spec");
-SetVerbose("Reconstruction", 2);
+SetVerbose("Reconstruction", 1);
 
 /* Start from a random ternary quartic */
 F := Rationals();  B := 1; Domain := [-B..B];
@@ -39,7 +39,7 @@ DOf, DOWght := DixmierOhnoInvariants(f);
 ChangeUniverse(~DOf, F);
 DOf_norm := WPSNormalize(DOWght, DOf);
 print "";
-print "Its invariants are", DOf_norm;
+print "Its invariants are", DOf;
 print "";
 print "Its normalized invariants are", DOf_norm;
 
@@ -58,10 +58,10 @@ print "The reconstructed curve is g =", g;
 DOg, _ := DixmierOhnoInvariants(g);
 ChangeUniverse(~DOg, F);
 DOg_norm := WPSNormalize(DOWght, DOg);
-print "";
-print "Its invariants are", DOg_norm;
-print "";
-print "Its normalized invariants are", DOg_norm;
+//print "";
+//print "Its invariants are", DOg;
+//print "";
+//print "Its normalized invariants are", DOg_norm;
 
 /* Check everything's fine */
 print "";
