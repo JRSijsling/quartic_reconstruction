@@ -66,7 +66,8 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false) 
     JointShioda := DixmierOhnoToJointShioda(DO);
 
     vprint Reconstruction : "Joint Shioda invariants:", JointShioda;
-    if Parent(DO[1]) eq Rationals() then
+    F := Parent(DO[1]);
+    if F eq Rationals() then
         WJS := [2..10];
         JointShioda, lambda1 := WPSMinimizeQQ(WJS, JointShioda);
         vprint Reconstruction : "Joint Shioda invariants after minimization:", JointShioda;
@@ -99,7 +100,6 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false) 
     vprint Reconstruction, 2 : "Reconstructed constant b_0:", b0h;
 
     vprint Reconstruction : "Final inversion...";
-    F := Parent(DO[1]);
     // Get it to the base field if possible:
     if &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ b8h, b4h, b0h ] ] ) then
         R<x1, x2, x3> := PolynomialRing(F, 3);
@@ -110,6 +110,12 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false) 
         vprint Reconstruction : "Descending...";
         R<x1, x2, x3> := PolynomialRing(F, 3);
         f := R ! Descent(f, b8);
+        /* TODO: Remove this and see what goes wrong with superfluous factors. */
+        if F eq Rationals() then
+            gcd_den := GCD([ Denominator(coeff) : coeff in Coefficients(f) ]);
+            gcd_num := GCD([ Numerator(coeff) : coeff in Coefficients(f) ]);
+            f *:= (gcd_den/gcd_num);
+        end if;
     end if;
 
     if not exact then
@@ -193,7 +199,7 @@ function HyperellipticPolynomialFromJointShiodaInvariants(JS)
     end if;
 
     vprint Reconstruction : "Determining non-twisted binary octic from Shioda invariants...";
-    b8 := HyperellipticPolynomialFromShiodaInvariants([S2, S3, S4, S5, S6, S7, S8, S9, S10]);
+    b8 := HyperellipticPolynomialFromShiodaInvariants([S2, S3, S4, S5, S6, S7, S8, S9, S10] : RationalModel := true);
     vprint Reconstruction, 2 : "Reconstructed non-twisted binary octic:", Homogenization(b8 : degree := 8);
 
     /* Extracting gcd of indices with non-zero invariant */

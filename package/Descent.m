@@ -99,6 +99,7 @@ end function;
 
 function Descent(f, b8);
 
+F := BaseRing(Parent(f));
 A := NormalizeCocycle(IsomorphismFromB8(b8));
 B := CoboundaryLinear(A);
 return TransformForm(f, B);

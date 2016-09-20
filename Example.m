@@ -23,19 +23,22 @@
 
 AttachSpec("package/spec");
 AttachSpec("g3twists_v2-0/spec");
-SetVerbose("Reconstruction", 1);
+
+SetVerbose("G3Twists", 1);
+SetVerbose("Reconstruction", 2);
 
 /* Start from a random ternary quartic */
 F := Rationals();  B := 1; Domain := [-B..B];
 //F := GF(NextPrime(10^5));  Domain := F;
 R<x1, x2, x3> := PolynomialRing(F, 3);
-f := &+[ Random(Domain)*mon : mon in MonomialsOfDegree(R, 4) ];
+repeat
+    f := &+[ Random(Domain)*mon : mon in MonomialsOfDegree(R, 4) ];
+    DOf, DOWght := DixmierOhnoInvariants(f);
+until DOf[#DOf] ne 0;
 
 print "";
 print "Start from f =", f;
 
-/* Compute its invariants normalize */
-DOf, DOWght := DixmierOhnoInvariants(f);
 ChangeUniverse(~DOf, F);
 DOf_norm := WPSNormalize(DOWght, DOf);
 print "";
@@ -44,13 +47,12 @@ print "";
 print "Its normalized invariants are", DOf_norm;
 
 /* Construct another quartic with equivalent invariants */
-//g := TernaryQuarticFromDixmierOhnoInvariant(DOf);
-g := TernaryQuarticFromDixmierOhnoInvariants(DOf : exact := false);
-//if F eq Rationals() then
-//    print g;
-//    print "Model over QQ found. Reducing its coefficients...";
-//    g := MinimizeReducePlaneQuartic(g);
-//end if;
+g := R ! TernaryQuarticFromDixmierOhnoInvariants(DOf : exact := false);
+if F eq Rationals() then
+    print g;
+    print "Model over QQ found. Reducing its coefficients...";
+    g := R ! MinimizeReducePlaneQuartic(g);
+end if;
 print "";
 print "The reconstructed curve is g =", g;
 
