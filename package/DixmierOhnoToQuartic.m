@@ -113,9 +113,6 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         f := R ! BinaryToTernary([b8h, b4h, b0h]);
         vprint Reconstruction : "Descending...";
 	R<x1, x2, x3> := PolynomialRing(F, 3);
-	ff := Descent(f, b8);
-	"PARENT IS", Parent(ff);
-	"R is", R;
         f := R ! Descent(f, b8);
         /* TODO: Remove this and see what goes wrong with superfluous factors. */
         if F eq Rationals() then
