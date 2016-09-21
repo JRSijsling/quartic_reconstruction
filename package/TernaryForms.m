@@ -146,16 +146,10 @@ function BinaryToTernary(bs);
     return f;
 end function;
 
-
 function ConjugateForm(sigma, f);
-
-return &+[ sigma(MonomialCoefficient(f, mon)) * mon : mon in Monomials(f) ];
-
+    return &+[ sigma(MonomialCoefficient(f, mon)) * mon : mon in Monomials(f) ];
 end function;
 
-
 function ConjugateMatrix(sigma, M);
-
-return Matrix([ [ sigma(c) : c in Eltseq(row) ] : row in Rows(M) ]);
-
+    return Matrix([ [ sigma(c) : c in Eltseq(row) ] : row in Rows(M) ]);
 end function;

@@ -40,7 +40,6 @@ import "JointCovariants.dat": S8S4Cov;
 import "JointCovariants.m": IthJointInvariant, JointCovariant, FirstJointInvariants, JointShiodaInvariants;
 import "Interpolations.m": JointInvariantFromDixmierOhno;
 import "Descent.m": Descent;
-import "WPSMinimizeQQ.m": WPSMinimizeQQ, WPSMultiply;
 import "AutStrataChar0.m":
     IsInStratumC9, IsInStratumG48, IsInStratumG96, IsInStratumG168,
     IsInStratumC6, IsInStratumG16, IsInStratumS4,
@@ -56,7 +55,7 @@ forward DixmierOhnoToBinaryQuartic;
 declare verbose Reconstruction, 2;
 
 
-intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := false) -> RngMPolElt, SeqEnum
+intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := false, RationalModel := true) -> RngMPolElt, SeqEnum
     {Reconstructs a ternary quartic from a given tuple of Dixmier-Ohno
     invariants DO, and also returns the binary forms associated to it by the
     usual equivariant morphism.
@@ -74,7 +73,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
     F := Parent(DO[1]);
     if F eq Rationals() then
         WJS := [2..10];
-        JointShioda, lambda1 := WPSMinimizeQQ(WJS, JointShioda);
+        JointShioda, lambda1 := WPSMinimize(WJS, JointShioda);
         vprint Reconstruction : "Joint Shioda invariants after minimization:", JointShioda;
     else
         lambda1 := Parent(DO[1]) ! 1;
@@ -173,21 +172,9 @@ function XGCDUnique(L)
 end function;
 
 
-function HyperellipticPolynomialFromJointShiodaInvariants(JS)
+function HyperellipticPolynomialFromJointShiodaInvariants(JS : RationalModel := true)
 
-    s2, s3, s4, s5, s6, s7, s8, s9, s10 := Explode(JS);
-
-    vprint Reconstruction : "Converting joint invariants to Shioda invariants...";
-    /* Hard-coded the results of S8S4ToShioda.m */
-    S2 := 40320*s2;
-    S3 := 967680*s3;
-    S4 := -(182476800*s4-276480000*s2^2);
-    S5 := 20901888000*s5;
-    S6 := -(-2483144294400*s6+39016857600*s3^2-1287556300800*s4*s2+1859803545600*s2^3);
-    S7 := -(-466168955535360*s7-17657914982400*s4*s3+98322481152000*s5*s2+26754416640000*s3*s2^2);
-    S8 := -(-419552059981824000*s8+29302048633651200/7*s4^2+337105649664000*s5*s3-6568744373452800*s6*s2-74950281422438400/7*s4*s2^2+46292784906240000/7*s2^4);
-    S9 := -(-30904504418304000000*s9+495682899148800000*s5*s4-244650412081152000*s6*s3-9438958190592000*s3^3+1699352331839078400*s7*s2-276699527774208000*s4*s3*s2-1724275332218880000*s5*s2^2+441265944526848000*s3*s2^3);
-    S10 := -(-131372369891827384320000/37*s10-54611115245568000000*s5^2-89184780750422016000*s6*s4-18795932287185715200*s7*s3-101709590298624000*s4*s3^2+704847460769464320000*s8*s2-22376109865697280000*s4^2*s2+3398024948613120000*s5*s3*s2+146163946229858304000*s6*s2^2+154105439846400000*s3^2*s2^2+63059945985146880000*s4*s2^3-44176892755968000000*s2^5);
+    S2, S3, S4, S5, S6, S7, S8, S9, S10 := Explode(ShiodaInvariantsFromJointShiodaInvariants(JS));
     vprint Reconstruction, 2 : "Shioda invariants:", [S2, S3, S4, S5, S6, S7, S8, S9, S10];
 
     /* b8 has a root of order 4, not yet implemented */
@@ -204,7 +191,7 @@ function HyperellipticPolynomialFromJointShiodaInvariants(JS)
     end if;
 
     vprint Reconstruction : "Determining non-twisted binary octic from Shioda invariants...";
-    b8 := HyperellipticPolynomialFromShiodaInvariants([S2, S3, S4, S5, S6, S7, S8, S9, S10] : RationalModel := true);
+    b8 := HyperellipticPolynomialFromShiodaInvariants([S2, S3, S4, S5, S6, S7, S8, S9, S10] : RationalModel := RationalModel);
     vprint Reconstruction, 2 : "Reconstructed non-twisted binary octic:", Homogenization(b8 : degree := 8);
 
     /* Extracting gcd of indices with non-zero invariant */
@@ -216,7 +203,7 @@ function HyperellipticPolynomialFromJointShiodaInvariants(JS)
      * Idx */
     bs := []; for i := 1 to #Idx do
 	if C[i] ne 0 then
-	    bs[Idx[i]] := Parent(s2)!IthJointInvariant(S8S4Cov, [0*b8, b8], Idx[i]);
+	    bs[Idx[i]] := Parent(JS[1])!IthJointInvariant(S8S4Cov, [0*b8, b8], Idx[i]);
 	end if;
     end for;
     vprint Reconstruction, 2 :
@@ -376,6 +363,24 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
 
     RD := RadicalDecomposition(II);
     vprint Reconstruction, 2 : "Ideal(s) in the coefficients:", RD;
+
+    /*
+    if #RD gt 1  then
+	vprint Reconstruction, 2 : "Hum... let us investigate which one of these ideals is the good one", RD;
+	for rd in RD do
+	    GB := Basis(RD[1]);
+
+	    NLEQ := GB;
+	    for i in [ 74 .. 126 ] diff ( { 74, 79, 85, 86, 95, 96 } join { 75, 77, 78, 83, 84, 92, 93, 94 } ) do
+		inv := JointInvariantFromDixmierOhno(QuadJointInvsNames[i], DO);
+		COV,_Precomputations := JointCovariant(S8S4Cov, [B4,B8], QuadJointInvsIndices[i] : Precomputations :=_Precomputations);
+		Append(~LEQ,Pa!(COV[1])-inv);
+		Append(~NLEQ, )
+	    end for;
+	    j4
+	end for;
+    end if;
+    */
 
     FQ := quo<Pa | RD[1]>;
 
@@ -939,7 +944,7 @@ end if;
 
 end function;
 
-intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false) -> SeqEnum, GrpPC
+intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, RationalModel := true) -> SeqEnum, GrpPC
     {Reconstructs a ternary quartic from a given tuple of Dixmier-Ohno
     invariants DO, and also returns the binary forms associated to it by the
     usual equivariant morphism.
@@ -1058,7 +1063,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false) 
 	aut := SmallGroup(8, 3);
 	if I12 ne 0 then
 	    twists := [
-		TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO:exact:=exact)
+		TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO:exact:=exact, RationalModel := RationalModel)
 		];
 	else
 	    twists := [
@@ -1074,7 +1079,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false) 
 	aut := SmallGroup(6, 1);
 	if I12 ne 0 then
 	    twists := [
-		TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO:exact:=exact)
+		TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO:exact:=exact, RationalModel := RationalModel)
 		];
 	else
 	    twists := [
@@ -1093,7 +1098,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false) 
 	aut := SmallGroup(4, 2);
 	if I12 ne 0 then
 	    twists := [
-		TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO:exact:=exact)
+		TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO:exact:=exact, RationalModel := RationalModel)
 		];
 	else
 	    twists := [
@@ -1106,7 +1111,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false) 
     /*** Otherwise (C2 or <Id> ?) ***/
     if I12 ne 0 then
 	twists := [
-	    TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO:exact:=exact)
+	    TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO:exact:=exact, RationalModel := RationalModel)
 	    ];
     end if;
 

@@ -15,6 +15,11 @@ to the user's .magmarc file, which can typically be found in the home directory)
 
 AttachSpec("~/Programs/Reconstruction/package/spec");
 
+A bug fix
+---------
+
+The functionality also uses the Magma algorithm MinimizeReducePlaneQuartic, due to Stoll et al., to simplify any output over the rationals. In order for this to work properly, a bug fix is needed of the file magma/package/Geometry/SrfDP/, which was kindly provided by Stoll and which can be found in BugFix.m.
+
 Usage
 -----
 

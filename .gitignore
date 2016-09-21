@@ -1,11 +1,8 @@
 .svn/*
 calculations/*
-cm_test/*
 experiments/*
-extended/*
 g2twists_v1-3/*
 g3twists_v1-1/*
-g3twists_v2-0/*
-makeconicquartic/*
+tointegrate/*
 *.sig
 *.swp
