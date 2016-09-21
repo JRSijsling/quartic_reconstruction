@@ -9,13 +9,13 @@ Installation
 
 A copy of the computer algebra system Magma is needed to run this code. After being cloned or downloaded, it can be made to run upon startup of Magma by adding the lines
 
-AttachSpec("[PATH]/package/spec");
-AttachSpec("g3twists\_v2-0/spec");
+AttachSpec("[PATH]/package/spec");  
+AttachSpec("[PATH]/g3twists\_v2-0/spec");
 
 to the user's .magmarc file, which can typically be found in the home directory). Here [PATH] is to be replaced by the directory of the cloned and downloaded repository, so that one could for example have
 
-AttachSpec("~/Programs/Reconstruction/package/spec");
-AttachSpec("g3twists\_v2-0/spec");
+AttachSpec("~/Programs/Reconstruction/package/spec");  
+AttachSpec("~/Programs/Reconstruction/g3twists\_v2-0/spec");
 
 A bug fix
 ---------
