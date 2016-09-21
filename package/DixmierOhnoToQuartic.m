@@ -112,7 +112,10 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         R<x1, x2, x3> := PolynomialRing(BaseRing(Parent(b8h)), 3);
         f := R ! BinaryToTernary([b8h, b4h, b0h]);
         vprint Reconstruction : "Descending...";
-        R<x1, x2, x3> := PolynomialRing(F, 3);
+	R<x1, x2, x3> := PolynomialRing(F, 3);
+	ff := Descent(f, b8);
+	"PARENT IS", Parent(ff);
+	"R is", R;
         f := R ! Descent(f, b8);
         /* TODO: Remove this and see what goes wrong with superfluous factors. */
         if F eq Rationals() then
@@ -954,6 +957,13 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
     equal in the corresponding weighted projective space).}
 
     FF := Universe(DO);
+
+    if Type(FF) eq RngInt then
+	return
+	   $$(ChangeUniverse(DO, Rationals()) : exact := exact, RationalModel := RationalModel);
+    end if;
+
+    
     P3 := PolynomialRing(FF, 3); X := P3.1; Y := P3.2; Z := P3.3;
 
     require
