@@ -29,7 +29,7 @@ prod := A * ConjugateMatrix(sigma, A);
 
 lambda := prod[1,1];
 B := (lambda/Determinant(A)) * A;
-return (lambda/Determinant(A)) * A;
+return B;
 
 end function;
 
@@ -40,20 +40,19 @@ L<s> := BaseRing(A);
 g := MinimalPolynomial(s);
 sigma := hom<L -> L | -Coefficient(g,1) - s>;
 
-B := 1;
-D := [-B..B];
+Bound := 1;
+D := [-Bound..Bound];
 while true do
     for i:=1 to 16 do
         B0 := Matrix(BaseRing(A), [ [ Random(D) + Random(D)*s : c in Eltseq(row) ] : row in Rows(A) ]);
         B := B0 + A * ConjugateMatrix(sigma, B0);
         if Rank(B) eq Rank(A) then
             if A * ConjugateMatrix(sigma, B) eq B then
-                //print A * ConjugateMatrix(sigma, B) eq B;
                 return B;
             end if;
         end if;
     end for;
-    B +:= 1;
+    Bound +:= 1;
 end while;
 
 end function;
@@ -71,7 +70,7 @@ BB := [ Matrix(L, 3, 3, [ KroneckerDelta(i, j) : j in [1..9] ]) : i in [1..9] ]
 cat [ Matrix(L, 3, 3, [ r * KroneckerDelta(i, j) : j in [1..9] ]) : i in [1..9] ];
 Sigma := DiagonalMatrix(L, [ 1 : i in [1..9] ] cat [ -1 : i in [1..9] ]);
 ASplit1 := Matrix(L, [ Eltseq(A * b) : b in BB ]);
-ASplit2 := HorizontalJoin(Matrix(L, [ [ (c + sigma(c))/2 : c in Eltseq(row) ] : row in Rows(ASplit1) ]), Matrix(L, [ [ (c - sigma(c))/(2*s) : c in Eltseq(row) ] : row in Rows(ASplit1) ]));
+ASplit2 := HorizontalJoin(Matrix(L, [ [ (c + sigma(c))/2 : c in Eltseq(row) ] : row in Rows(ASplit1) ]), Matrix(L, [ [ (c - sigma(c))/(2*r) : c in Eltseq(row) ] : row in Rows(ASplit1) ]));
 K := Kernel(Sigma * ASplit2 - 1);
 
 if BaseRing(L) eq Rationals() then
@@ -83,10 +82,10 @@ B := 1;
 D := [-B..B];
 while true do
     for i:=1 to 16 do
-        //print "boink";
         v := &+[ Random(D) * Lat.i : i in [1..Rank(Lat)] ];
         B := &+[ v[i] * BB[i] : i in [1..#BB] ];
         if Rank(B) eq Rank(A) then
+            //print "Cocycle works?";
             //print A * ConjugateMatrix(sigma, B) eq B;
             return B;
         end if;
@@ -99,9 +98,10 @@ end function;
 
 function Descent(f, b8);
 
-F := BaseRing(Parent(f));
 A := NormalizeCocycle(IsomorphismFromB8(b8));
 B := CoboundaryLinear(A);
-return TransformForm(f, B);
+//B := CoboundaryRandom(A);
+f0 := TransformForm(f, B);
+return f0 / Coefficients(f0)[1];
 
 end function;

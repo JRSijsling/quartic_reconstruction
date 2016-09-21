@@ -27,10 +27,10 @@ AttachSpec("g3twists_v2-0/spec");
 SetVerbose("Reconstruction", 2);
 SetVerbose("G3Twists", 1);
 SetVerbose("PlaneQuartic", 1);
-SetVerbose("ClusterReduction", 2);
+//SetVerbose("ClusterReduction", 2);
 
 /* Start from a random ternary quartic */
-F := Rationals();  B := 2^6; Domain := [-B..B];
+F := Rationals();  B := 2^4; Domain := [-B..B];
 //F := GF(NextPrime(10^5));  Domain := F;
 R<x1, x2, x3> := PolynomialRing(F, 3);
 repeat
@@ -41,7 +41,6 @@ until DOf[#DOf] ne 0;
 print "";
 print "Start from f =", f;
 
-//ChangeUniverse(~DOf, F);
 DOf_norm := WPSNormalize(DOWght, DOf);
 print "";
 print "Its invariants are", DOf;

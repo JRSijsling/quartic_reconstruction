@@ -80,7 +80,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
     end if;
 
     WDO := [ 3, 6, 9, 9, 12, 12, 15, 15, 18, 18, 21, 21, 27 ];
-    DO := WPSMultiply(WDO, DO, lambda1);
+    DOnew := WPSMultiply(WDO, DO, lambda1);
 
     vprint Reconstruction : "Reconstructing binary octic b_8...";
     b8, lambda2 := HyperellipticPolynomialFromJointShiodaInvariants(JointShioda);
@@ -94,13 +94,13 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
     vprint Reconstruction, 2 : "Reconstructed binary octic b_8:", Homogenization(b8 : degree := 8);
 
     vprint Reconstruction : "Reconstructing binary octic b_4...";
-    b4 := DixmierOhnoToBinaryQuartic(DO, b8 : lambda := lambda1);
+    b4 := DixmierOhnoToBinaryQuartic(DOnew, b8 : lambda := lambda1);
     vprint Reconstruction, 2 : "Reconstructed binary quartic b_4:", Homogenization(b4 : degree := 4);
 
     S := PolynomialRing(CoefficientRing(b4), 2);
     b8h := S ! Homogenization(b8 : degree := 8);
     b4h := S ! Homogenization(b4 : degree := 4);
-    b0h := S ! (lambda1^(-8) * DO[3]);
+    b0h := S ! (lambda1^(-8) * DOnew[3]);
     vprint Reconstruction, 2 : "Reconstructed constant b_0:", b0h;
 
     vprint Reconstruction : "Final inversion...";
