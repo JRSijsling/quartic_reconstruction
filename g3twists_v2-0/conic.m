@@ -144,7 +144,7 @@ end function;
 
 */
 
-function FindPointOnConic(L : RationalPoint := true, RandomLine := true, Legendre := false, B := 1)
+function FindPointOnConic(L : RationalPoint := true, RandomLine := false, Legendre := false, B := 1)
     /* B is the maximal height of the integral coefficients of the intersecting line. */
 
     K := BaseRing(Parent(L));
@@ -222,6 +222,16 @@ function MinimizeLinearEquationOverRationals(LE)
     return U*c, V*c;
 end function;
 
+/* Temporary copy: */
+function TransformForm(f, T : co := true, contra := false)
+    R := Parent(f);
+    vars := Matrix([ [ mon ] : mon in MonomialsOfDegree(R, 1) ]);
+    if (not co) or contra then
+        return Evaluate(f, Eltseq(ChangeRing(Transpose(T)^(-1), R) * vars));
+    end if;
+    return Evaluate(f, Eltseq(ChangeRing(T, R) * vars));
+end function;
+
 function Genus3ConicAndQuartic(JI : models := true, RationalModel := true)
 
     FF := Universe(JI);
@@ -240,56 +250,80 @@ function Genus3ConicAndQuartic(JI : models := true, RationalModel := true)
 
 	    /* Let us find a conic with small discriminant */
 
-	    vprintf G3Twists, 1 :  "Let us minimize the discriminant of the conic to be used, i.e %o\n\n", R;
+	    vprintf G3Twists, 2 :  "Let us minimize the discriminant of the conic to be used, i.e %o\n\n", R;
 
 	    U, V := MinimizeLinearEquationOverRationals(R);
 
-	    vprintf G3Twists, 1 :  "We set :";
-	    vprintf G3Twists, 1 :  "  u = %o\n", U;
-	    vprintf G3Twists, 1 :  "  v = %o\n", V;
+	    vprintf G3Twists, 2 :  "We set :";
+	    vprintf G3Twists, 2 :  "  u = %o\n", U;
+	    vprintf G3Twists, 2 :  "  v = %o\n", V;
 
 	    R, C, Q := Genus3ConicAndQuarticUV([FF | U, V], JI : models := models);
 
-	    vprintf G3Twists, 1 :  "So that :";
-	    vprintf G3Twists, 1 :  "  R = %o\n", R;
+	    vprintf G3Twists, 2 :  "So that :";
+	    vprintf G3Twists, 2 :  "  R = %o\n", R;
 
-	    /* Let us first remove the content of C */
+	    /* Let us first remove the content of C and Q */
 	    ct := GCD([Denominator(c) : c in Coefficients(C)]) /
 		  GCD([Numerator(c) : c in Coefficients(C)]);
 	    C *:= ct;
-
-	    /* This done, let us minimize C and Q */
-
-	    Cphi, phi := MinimalModel(Conic(ProjectiveSpace(Parent(C)), C));
-	    C := DefiningPolynomial(Cphi);
-	    vprintf G3Twists, 1 :  "Once minimized, we get the conic %o\n", C;
-
 	    ct := GCD([Denominator(c) : c in Coefficients(Q)]) /
 		GCD([Numerator(c) : c in Coefficients(Q)]);
 	    Q *:= ct;
 
+	    Cphi, phi := MinimalModel(Conic(ProjectiveSpace(Parent(C)), C));
+	    C := DefiningPolynomial(Cphi);
+	    vprintf G3Twists, 2 :  "In the minimal model step, we get the conic %o\n", C;
 	    Q := Evaluate(Q, DefiningPolynomials(phi));
-
-
 	    ct := GCD([Denominator(c) : c in Coefficients(Q)]) /
 		  GCD([Numerator(c) : c in Coefficients(Q)]);
 	    Q *:= ct;
+	    vprintf G3Twists, 2 :  "And then, the quartic is %o\n", Q;
 
-	    vprintf G3Twists, 1 :  "And then, the quartic is %o\n", Q;
+            if false then
+                /* The following factorization is necessary first: */
+                Fac := Factorization(Integers() ! Discriminant(Conic(ProjectiveSpace(Parent(C)), C)));
+                Cphi, phi := ReducedLegendreModel(Conic(ProjectiveSpace(Parent(C)), C));
+                C := DefiningPolynomial(Cphi);
+                Q := Evaluate(Q, DefiningPolynomials(Inverse(phi)));
+                ct := GCD([Denominator(c) : c in Coefficients(Q)]) /
+                      GCD([Numerator(c) : c in Coefficients(Q)]);
+                Q *:= ct;
+            
+                Cphi, phi := MinimalModel(Conic(ProjectiveSpace(Parent(C)), C));
+                C := DefiningPolynomial(Cphi);
+                Q := Evaluate(Q, DefiningPolynomials(phi));
+                ct := GCD([Denominator(c) : c in Coefficients(Q)]) /
+                      GCD([Numerator(c) : c in Coefficients(Q)]);
+                Q *:= ct;
+
+                Q, T := MinimizeReducePlaneQuartic(Q);
+                C := TransformForm(C, T);
+                ct := GCD([Denominator(c) : c in Coefficients(C)]) /
+                      GCD([Numerator(c) : c in Coefficients(C)]);
+                C *:= ct;
+
+                vprintf G3Twists, 2 :  "After further twiddling, we get the conic %o\n", C;
+                vprintf G3Twists, 2 :  "And then, the quartic is %o\n", Q;
+            end if;
 
             _, T := ReduceMestreConicAndQuartic(C, Q);
+            // The determinant indeed equals (pm) 1:
+            //_<x1,x2,x3> := Parent(T[1]);
+            //vprintf G3Twists, 2 :  "Determinant: %o\n", Determinant(Matrix([[ MonomialCoefficient(t, var) : var in [x1,x2,x3] ] : t in T ]));
 
 	    C := Evaluate(C, T);
             gcd_den := GCD([ Denominator(coeff) : coeff in Coefficients(C) ]);
             gcd_num := GCD([ Numerator(coeff) : coeff in Coefficients(C) ]);
             C *:= (gcd_den/gcd_num);
-	    vprintf G3Twists, 1 :  "Using cluster reduction, we get the conic %o\n", C;
+            _<x1,x2,x3> := Parent(C);
+	    vprintf G3Twists, 1 :  "After minimization and cluster reduction, we get the conic\n%o\n", C;
 
             Q := Evaluate(Q, T);
             gcd_den := GCD([ Denominator(coeff) : coeff in Coefficients(Q) ]);
             gcd_num := GCD([ Numerator(coeff) : coeff in Coefficients(Q) ]);
             Q *:= (gcd_den/gcd_num);
-	    vprintf G3Twists, 1 :  "And then, the quartic is %o\n", Q;
+	    vprintf G3Twists, 1 :  "together with the quartic\n%o\n", Q;
 
 	else
 	    R := FF!0;

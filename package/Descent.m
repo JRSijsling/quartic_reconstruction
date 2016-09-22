@@ -2,6 +2,8 @@
 
 import "TernaryForms.m": ConjugateForm, ConjugateMatrix, TransformForm;
 
+declare verbose Descent, 1;
+
 
 function GL2ToGL3(U);
     a,b,c,d := Explode(U);
@@ -34,25 +36,45 @@ return B;
 end function;
 
 
-function CoboundaryRandom(A);
+function CoboundaryRandom(A : SmallCoboundary := true);
 
 L<s> := BaseRing(A);
 g := MinimalPolynomial(s);
 sigma := hom<L -> L | -Coefficient(g,1) - s>;
 
+counter := 0;
 Bound := 1;
+ECMLimit := 5000;
 D := [-Bound..Bound];
 while true do
-    for i:=1 to 16 do
+    for i:=1 to (Bound + 1)^3 do
         B0 := Matrix(BaseRing(A), [ [ Random(D) + Random(D)*s : c in Eltseq(row) ] : row in Rows(A) ]);
         B := B0 + A * ConjugateMatrix(sigma, B0);
         if Rank(B) eq Rank(A) then
-            if A * ConjugateMatrix(sigma, B) eq B then
-                return B;
+            if not SmallCoboundary then
+                return B, [];
+            else
+                nm := Norm(Determinant(B));
+                num := Abs(Numerator(nm));
+                den := Abs(Denominator(nm));
+                vprint Descent : "Checking coboundary for smallness...";
+                Fac_num := Factorization(num : MPQSLimit := 0, ECMLimit := ECMLimit);
+                Fac_den := Factorization(den : MPQSLimit := 0, ECMLimit := ECMLimit);
+                test := (FactorizationToInteger(Fac_num) eq num) and (FactorizationToInteger(Fac_den) eq den);
+                if test then
+                    bp := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_den ]);
+                    vprint Descent : "Primes in coboundary:";
+                    vprint Descent : bp;
+                    return B, bp;
+                end if;
             end if;
         end if;
     end for;
-    Bound +:= 1;
+    ECMLimit +:= 1000;
+    counter +:= 1;
+    if counter mod 4 eq 0 then
+        Bound +:= 1;
+    end if;
 end while;
 
 end function;
@@ -87,7 +109,7 @@ while true do
         if Rank(B) eq Rank(A) then
             //print "Cocycle works?";
             //print A * ConjugateMatrix(sigma, B) eq B;
-            return B;
+            return B, [];
         end if;
     end for;
     B +:= 1;
@@ -96,12 +118,15 @@ end while;
 end function;
 
 
-function Descent(f, b8);
+function Descent(f, b8 : RandomCoboundary := false, SmallCoboundary := true);
 
 A := NormalizeCocycle(IsomorphismFromB8(b8));
-B := CoboundaryLinear(A);
-//B := CoboundaryRandom(A);
+if not RandomCoboundary then
+    B, bp := CoboundaryLinear(A);
+else
+    B, bp := CoboundaryRandom(A : SmallCoboundary := SmallCoboundary);
+end if;
 f0 := TransformForm(f, B);
-return f0 / Coefficients(f0)[1];
+return f0 / Coefficients(f0)[1], bp;
 
 end function;

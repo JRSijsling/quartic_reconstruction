@@ -1,6 +1,6 @@
 /* Replace the last function in magma/package/Geometry/SrfDP/ by this: */
 
-intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt) -> RngMPolElt, Mtrx
+intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt : bp0 := []) -> RngMPolElt, Mtrx
 {Minimization and reduction of a plane quartic curve with integral coefficients.
  Returns an isomorphic quartic with small coefficients, and the transformation matrix.}
 
@@ -18,7 +18,7 @@ intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt) -> RngMPolElt, Mtrx
 
  subs := [Parent(f).i : i in [1..3]];
  res := f div GCD(Coefficients(f));
- for p in [2,3,5] do
+ for p in [2,3,5] cat bp0 do
   vprintf PlaneQuartic,1: "Local minimization for p = %o\n",p;
   repeat
    res,subs_n := LocalMinimizationStepPlaneQuartic(res,p);
@@ -43,7 +43,11 @@ intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt) -> RngMPolElt, Mtrx
  res := res div GCD(Coefficients(res));
 
 /* Final reduction step */
+ _<x1,x2,x3> := Parent(res);
+ vprintf PlaneQuartic,1: "Curve before Stoll reduction: %o\n",res;
  res, Trr := ReducePlaneCurve(res);
 
  return res, Lat*Trr;
 end intrinsic;
+
+

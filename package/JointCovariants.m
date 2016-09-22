@@ -257,7 +257,6 @@ intrinsic ShiodaInvariantsFromJointShiodaInvariants(JS :: SeqEnum) -> SeqEnum
 
     s2, s3, s4, s5, s6, s7, s8, s9, s10 := Explode(JS);
 
-    vprint Reconstruction : "Converting joint invariants to Shioda invariants...";
     /* Hard-coded the results of S8S4ToShioda.m */
     S2 := 40320*s2;
     S3 := 967680*s3;
