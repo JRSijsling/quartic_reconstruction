@@ -38,4 +38,4 @@ If you have used this code and it has been helpful, then please consider citing 
 
 Reynald Lercier, Christophe Ritzenthaler, and Jeroen Sijsling  
 *Reconstructing plane quartic from their invariants*  
-[ArXiV link upcoming.]
+[http://arxiv.org/abs/1606.05594](http://arxiv.org/abs/1606.05594 "http://arxiv.org/abs/1606.05594")
