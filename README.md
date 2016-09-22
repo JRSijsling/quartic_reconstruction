@@ -20,7 +20,7 @@ AttachSpec("~/Programs/Reconstruction/g3twists\_v2-0/spec");
 A bug fix
 ---------
 
-The functionality also uses the Magma algorithm MinimizeReducePlaneQuartic, due to Stoll et al., to simplify any output over the rationals. In order for this to work properly, one needs a bug fix / improvement of the file magma/package/Geometry/SrfDP/, which can be found in BugFix.m.
+The functionality also uses the Magma algorithm MinimizeReducePlaneQuartic, due to Elsenhans, Stoll et al., to simplify any output over the rationals. In order for this to work properly, one needs a bug fix / improvement of the file magma/package/Geometry/SrfDP/, which can be found in BugFix.m.
 
 Usage
 -----
