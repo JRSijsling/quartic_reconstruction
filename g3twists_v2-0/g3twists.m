@@ -2247,7 +2247,11 @@ intrinsic HyperellipticPolynomialFromShiodaInvariants(JI::SeqEnum : RationalMode
     FF := Universe(JI);
     require not Characteristic(FF) in {2} : "2 must be invertible in the base field.";
 
-    twists, aut := HyperellipticPolynomialsFromShiodaInvariants(JI: RationalModel := RationalModel);
+    if Characteristic(FF) eq 0 then
+        twists, aut := HyperellipticPolynomialsFromShiodaInvariants(JI: RationalModel := RationalModel);
+    else
+        twists, aut := HyperellipticPolynomialsFromShiodaInvariants(JI);
+    end if;
 
     return twists[1], aut;
 end intrinsic;

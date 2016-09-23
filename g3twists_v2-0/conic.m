@@ -152,7 +152,7 @@ function FindPointOnConic(L : RationalPoint := true, RandomLine := false, Legend
     C := Conic(P, L);
 
     /* Can we find a rational point on this conic ? */
-    if RationalPoint
+    if (Type(K) eq FldFin) or (RationalPoint
 	and ((Type(K) in {FldRat, FldFin, RngInt}) or
 	     (Type(K) eq FldAlg and (
 	            Degree(K) eq 1 or IsSimple(K))) or
@@ -161,7 +161,7 @@ function FindPointOnConic(L : RationalPoint := true, RandomLine := false, Legend
 		    ISA(Type(BaseField(K)),FldNum) or
 		    (IsFinite(BaseField(K)) and Characteristic(BaseField(K)) ne 2 ))) or
 
-	     (ISA(Type(K), FldFunG) and Characteristic(K) ne 2))
+	     (ISA(Type(K), FldFunG) and Characteristic(K) ne 2)))
 	then
 	HasRatPoint, Pt := HasRationalPoint(C);
 	if HasRatPoint then

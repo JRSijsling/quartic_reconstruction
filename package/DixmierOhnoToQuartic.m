@@ -63,17 +63,24 @@ forward HyperellipticPolynomialFromJointShiodaInvariants;
 forward DixmierOhnoToJointShioda;
 forward DixmierOhnoToBinaryQuartic;
 
-intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := false, minimize := false, RationalModel := true) -> RngMPolElt, SeqEnum
+intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := false, minimize := true, descent := true, search_point := true) -> RngMPolElt, SeqEnum
     {Reconstructs a ternary quartic from a given tuple of Dixmier-Ohno
     invariants DO, and also returns the binary forms associated to it by the
-    usual equivariant morphism.
+    usual equivariant morphism. The invariant I12 is supposed to be not equal
+    to zero.
 
     If the flag exact is set to true, then a ternary forms is returned whose
     Dixmier-Ohno invariants exactly equal DOInv (instead of merely being
     equal in the corresponding weighted projective space).
     
+    If the flag descent is set to true, then the curve is descended to its base
+    field.
+    
     If the flag minimize is set to true, then over the rationals an effort is
-    made to return as small a model as possible.}
+    made to return as small a model as possible.
+    
+    If the flag search_point is set to true, then the algorithm tries to find a
+    rational point of the Mestre conic of the associated binary form.}
 
     vprint Reconstruction : "Start of quartic reconstruction.";
     F := Parent(DO[1]);
@@ -102,7 +109,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
     end if;
 
     vprint Reconstruction : "Reconstructing binary octic b_8...";
-    b8, lambda2 := HyperellipticPolynomialFromJointShiodaInvariants(JointShioda);
+    b8, lambda2 := HyperellipticPolynomialFromJointShiodaInvariants(JointShioda : search_point := search_point);
     b8 *:= (1/lambda1) * lambda2;
     /* Alternative version: */
     //b8 *:= lambda2;
@@ -128,7 +135,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
     vprint Reconstruction : "Reconstructed constant b_0:", b0h;
 
     vprint Reconstruction : "Final inversion...";
-    if &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ b8h, b4h, b0h ] ] ) then
+    if not descent or &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ b8h, b4h, b0h ] ] ) then
         R<x1, x2, x3> := PolynomialRing(F, 3);
         f := R ! BinaryToTernary([b8h, b4h, b0h]);
     else
@@ -149,9 +156,12 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         f *:= lcm_num;
         vprint Reconstruction : "A first model over the rationals is given by";
         vprint Reconstruction : f;
-        vprint Reconstruction : "Reducing coefficients...";
+        if minimize then
+            vprint Reconstruction : "Reducing coefficients...";
+            f := MinimizeReducePlaneQuartic(f : BadPrimesList := bp0, ImproveFurther := true);
+        end if;
         R<x1, x2, x3> := PolynomialRing(F, 3);
-        f := R ! MinimizeReducePlaneQuartic(f : BadPrimesList := bp0);
+        f := R ! f;
     end if;
 
     if not exact then
@@ -199,7 +209,7 @@ function XGCDUnique(L)
 end function;
 
 
-function HyperellipticPolynomialFromJointShiodaInvariants(JS : RationalModel := true)
+function HyperellipticPolynomialFromJointShiodaInvariants(JS : search_point := true)
 
     vprint Reconstruction : "Converting joint invariants to Shioda invariants...";
     S2, S3, S4, S5, S6, S7, S8, S9, S10 := Explode(ShiodaInvariantsFromJointShiodaInvariants(JS));
@@ -219,7 +229,7 @@ function HyperellipticPolynomialFromJointShiodaInvariants(JS : RationalModel := 
     end if;
 
     vprint Reconstruction : "Determining non-twisted binary octic from Shioda invariants...";
-    b8 := HyperellipticPolynomialFromShiodaInvariants([S2, S3, S4, S5, S6, S7, S8, S9, S10] : RationalModel := RationalModel);
+    b8 := HyperellipticPolynomialFromShiodaInvariants([S2, S3, S4, S5, S6, S7, S8, S9, S10] : RationalModel := search_point);
     K := BaseRing(Parent(b8));
     r := K.1;
     vprint Reconstruction, 2 : "Reconstructed non-twisted binary octic:", Homogenization(b8 : degree := 8);
@@ -421,20 +431,28 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
 end function;
 
 
-intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, RationalModel := true) -> SeqEnum, GrpPC
+intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, minimize := true, descent := true, search_point := true) -> RngMPolElt, SeqEnum
     {Reconstructs a ternary quartic from a given tuple of Dixmier-Ohno
-    invariants DO, and also returns the binary forms associated to it by the
-    usual equivariant morphism.
+    invariants DO.
 
     If the flag exact is set to true, then a ternary forms is returned whose
     Dixmier-Ohno invariants exactly equal DOInv (instead of merely being
-    equal in the corresponding weighted projective space).}
+    equal in the corresponding weighted projective space).
+    
+    If the flag descent is set to true, then the curve is descended to its base
+    field.
+    
+    If the flag minimize is set to true, then over the rationals an effort is
+    made to return as small a model as possible.
+    
+    If the flag search_point is set to true, then the algorithm tries to find a
+    rational point of the Mestre conic of the associated binary form.}
 
     FF := Universe(DO);
 
     if Type(FF) eq RngInt then
 	return
-	   $$(ChangeUniverse(DO, Rationals()) : exact := exact, RationalModel := RationalModel);
+	   $$(ChangeUniverse(DO, Rationals()) : exact := exact, search_point := search_point);
     end if;
 
     P3 := PolynomialRing(FF, 3); X := P3.1; Y := P3.2; Z := P3.3;
@@ -544,7 +562,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
 	aut := SmallGroup(8, 3);
 	if I12 ne 0 then
 	    twists := [
-		TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO: exact:=exact, RationalModel := RationalModel)
+                TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point)
 		];
 	else
 	    twists := [
@@ -560,7 +578,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
 	aut := SmallGroup(6, 1);
 	if I12 ne 0 then
 	    twists := [
-		TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO: exact:=exact, RationalModel := RationalModel)
+                TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point)
 		];
 	else
 	    twists := [
@@ -578,7 +596,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
 	aut := SmallGroup(4, 2);
 	if I12 ne 0 then
 	    twists := [
-		TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO: exact:=exact, RationalModel := RationalModel)
+                TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point)
 		];
 	else
 	    twists := [
@@ -590,8 +608,9 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
 
     /*** Otherwise (C2 or <Id>) ***/
     if I12 ne 0 then
-	twist, _ := TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO: exact:=exact, RationalModel := RationalModel);
-        twists := [ twist ];
+        twists := [
+            TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point)
+            ];
     end if;
 
     return twists[1], aut, twists;
