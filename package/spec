@@ -4,7 +4,8 @@
   JointCovariants.dat
   JointCovariants.m
   Interpolations.m
-  AutStrataChar0.m
   Descent.m
+  AutStrataChar0Equations.m
+  AutStrataChar0Reconstruction.m
   DixmierOhnoToQuartic.m
 }

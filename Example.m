@@ -18,7 +18,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  Copyright 2016 R. Lercier, C. Ritzenthaler & J. Sijsling
+ *  Copyright 2016 R. Lercier, C. Ritzenthaler & J.R. Sijsling
  */
 
 AttachSpec("package/spec");
@@ -27,8 +27,7 @@ AttachSpec("g3twists_v2-0/spec");
 SetVerbose("Reconstruction", 1);
 SetVerbose("G3Twists", 1);
 SetVerbose("PlaneQuartic", 1);
-SetVerbose("Descent", 1);
-//SetVerbose("ClusterReduction", 2);
+SetVerbose("ClusterReduction", 1);
 
 /* Start from a random ternary quartic */
 F := Rationals();  B := 2^7; Domain := [-B..B];
@@ -39,26 +38,18 @@ repeat
     DOf, DOWght := DixmierOhnoInvariants(f);
 until DOf[#DOf] ne 0;
 
+/* Display curve and normalize invariants: */
 print "";
 print "Start from f =", f;
-
-DOf_norm := WPSNormalize(DOWght, DOf);
 print "";
 print "Its invariants are", DOf;
+DOf_norm := WPSNormalize(DOWght, DOf);
 
 /* Construct another quartic with equivalent invariants */
-g, aut, twists, bp0 := TernaryQuarticFromDixmierOhnoInvariants(DOf : Exact := false);
-g := R ! g;
-if F eq Rationals() then
-    vprint Reconstruction : "A first model over the rationals is given by";
-    print g;
-    print "Automorphism group", aut;
-    print "Reducing coefficients...";
-    R<x1, x2, x3> := PolynomialRing(F, 3);
-    g := R ! MinimizeReducePlaneQuartic(g : bp0 := bp0);
-end if;
+g, aut, twists := TernaryQuarticFromDixmierOhnoInvariants(DOf);
 print "";
 print "The reconstructed curve is g =", g;
+print "Automorphism group", aut;
 
 /* Compute its invariants and normalize */
 DOg, _ := DixmierOhnoInvariants(g);
@@ -67,7 +58,7 @@ DOg_norm := WPSNormalize(DOWght, DOg);
 
 /* Check everything's fine */
 print "";
-print "Test for equality of actual invariants:", DOf eq DOg;
+print "Test for equality of invariants:", DOf eq DOg;
 print "";
 print "Test for equality of normalized invariants:", DOf_norm eq DOg_norm;
 

@@ -18,10 +18,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  Copyright 2016 R. Lercier, C. Ritzenthaler & J. Sijsling
+ *  Copyright 2016 R. Lercier, C. Ritzenthaler & J.R. Sijsling
  */
 
 AttachSpec("../package/spec");
+AttachSpec("../g3twists_v2-0/spec");
 SetVerbose("Reconstruction", 2);
 
 print "We reconstruct the curve from the paper.";

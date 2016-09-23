@@ -1,8 +1,10 @@
 /* Replace the last function in magma/package/Geometry/SrfDP/ by this: */
 
-intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt : bp0 := []) -> RngMPolElt, Mtrx
+intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt : BadPrimesList := [], ImproveFurther := true) -> RngMPolElt, Mtrx
 {Minimization and reduction of a plane quartic curve with integral coefficients.
- Returns an isomorphic quartic with small coefficients, and the transformation matrix.}
+ Returns an isomorphic quartic with small coefficients, and the transformation matrix.
+ 
+ The flag BadPrimesList can be used to give a subset of bad primes. If ImproveFurther is set to false, no further minimization outside this set is attempted and the algorithm immediately proceeds to the reduction step at the end.}
 
  r := Rank(Parent(f));
  require r eq 3: "Polynomial in 3 variables expected.";
@@ -18,7 +20,7 @@ intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt : bp0 := []) -> RngMPolElt,
 
  subs := [Parent(f).i : i in [1..3]];
  res := f div GCD(Coefficients(f));
- for p in [2,3,5] cat bp0 do
+ for p in [2,3,5] cat [ q : q in BadPrimesList | not q in [2,3,5] ] do
   vprintf PlaneQuartic,1: "Local minimization for p = %o\n",p;
   repeat
    res,subs_n := LocalMinimizationStepPlaneQuartic(res,p);
@@ -26,15 +28,17 @@ intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt : bp0 := []) -> RngMPolElt,
   until  subs_n eq [Parent(f).i : i in [1..3]];
  end for;
  vprintf PlaneQuartic,1: "Computing bad primes.\n";
- bp := ImproveablePrimes(res);
- vprintf PlaneQuartic, 1:"Bad primes %o.\n",bp;
- for p in bp do
-  vprintf PlaneQuartic,1: "Local minimization for p = %o\n",p;
-  repeat
-   res,subs_n := LocalMinimizationStepPlaneQuartic(res,p);
-   subs := [Evaluate(a,subs_n) : a in subs];
-  until  subs_n eq [Parent(f).i : i in [1..3]];
- end for;
+ if ImproveFurther then
+  bp := ImproveablePrimes(res);
+  vprintf PlaneQuartic, 1:"Bad primes %o.\n",bp;
+  for p in bp do
+   vprintf PlaneQuartic,1: "Local minimization for p = %o\n",p;
+   repeat
+    res,subs_n := LocalMinimizationStepPlaneQuartic(res,p);
+    subs := [Evaluate(a,subs_n) : a in subs];
+   until  subs_n eq [Parent(f).i : i in [1..3]];
+  end for;
+ end if;
 
 /* Simplify Transformation obtained by the minimization algorithm using LLL */
  Lat := LLL(Matrix([[MonomialCoefficient(subs[j],Parent(f).i) : j in [1..#subs]] : i in [1..Rank(Parent(f))]]));
@@ -49,5 +53,4 @@ intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt : bp0 := []) -> RngMPolElt,
 
  return res, Lat*Trr;
 end intrinsic;
-
 

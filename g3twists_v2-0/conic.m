@@ -271,17 +271,24 @@ function Genus3ConicAndQuartic(JI : models := true, RationalModel := true)
 		GCD([Numerator(c) : c in Coefficients(Q)]);
 	    Q *:= ct;
 
+            vprintf G3Twists, 1 :
+                "Factorization of conic discriminant before reduction: %o\n",
+                Factorization(Integers() ! Discriminant(Conic(ProjectiveSpace(Parent(C)), C)));
+
+            vprintf G3Twists, 2 : "Minimal model step...\n";
 	    Cphi, phi := MinimalModel(Conic(ProjectiveSpace(Parent(C)), C));
 	    C := DefiningPolynomial(Cphi);
-	    vprintf G3Twists, 2 :  "In the minimal model step, we get the conic %o\n", C;
 	    Q := Evaluate(Q, DefiningPolynomials(phi));
 	    ct := GCD([Denominator(c) : c in Coefficients(Q)]) /
 		  GCD([Numerator(c) : c in Coefficients(Q)]);
 	    Q *:= ct;
-	    vprintf G3Twists, 2 :  "And then, the quartic is %o\n", Q;
+	    vprintf G3Twists, 2 :  "Conic %o\n", C;
+	    vprintf G3Twists, 2 :  "Quartic %o\n", Q;
 
+            /* This does not seem to be useful in practice: */
             if false then
-                /* The following factorization is necessary first: */
+                /* For some reason the following factorization is necessary first: */
+                vprintf G3Twists, 2 : "Reduced Legendre step...\n";
                 Fac := Factorization(Integers() ! Discriminant(Conic(ProjectiveSpace(Parent(C)), C)));
                 Cphi, phi := ReducedLegendreModel(Conic(ProjectiveSpace(Parent(C)), C));
                 C := DefiningPolynomial(Cphi);
@@ -289,42 +296,48 @@ function Genus3ConicAndQuartic(JI : models := true, RationalModel := true)
                 ct := GCD([Denominator(c) : c in Coefficients(Q)]) /
                       GCD([Numerator(c) : c in Coefficients(Q)]);
                 Q *:= ct;
-            
+                vprintf G3Twists, 2 :  "Conic %o\n", C;
+                vprintf G3Twists, 2 :  "Quartic %o\n", Q;
+
+                vprintf G3Twists, 2 : "Further minimal model step...";
                 Cphi, phi := MinimalModel(Conic(ProjectiveSpace(Parent(C)), C));
                 C := DefiningPolynomial(Cphi);
                 Q := Evaluate(Q, DefiningPolynomials(phi));
                 ct := GCD([Denominator(c) : c in Coefficients(Q)]) /
                       GCD([Numerator(c) : c in Coefficients(Q)]);
                 Q *:= ct;
+                vprintf G3Twists, 2 :  "Conic %o\n", C;
+                vprintf G3Twists, 2 :  "Quartic %o\n", Q;
 
+                vprintf G3Twists, 2 : "Quartic reduction...";
                 Q, T := MinimizeReducePlaneQuartic(Q);
                 C := TransformForm(C, T);
                 ct := GCD([Denominator(c) : c in Coefficients(C)]) /
                       GCD([Numerator(c) : c in Coefficients(C)]);
                 C *:= ct;
-
-                vprintf G3Twists, 2 :  "After further twiddling, we get the conic %o\n", C;
-                vprintf G3Twists, 2 :  "And then, the quartic is %o\n", Q;
+                vprintf G3Twists, 2 :  "Conic %o\n", C;
+                vprintf G3Twists, 2 :  "Quartic %o\n", Q;
             end if;
 
+	    vprintf G3Twists, 2 :  "Cluster reduction...\n";
             _, T := ReduceMestreConicAndQuartic(C, Q);
-            // The determinant indeed equals (pm) 1:
-            //_<x1,x2,x3> := Parent(T[1]);
-            //vprintf G3Twists, 2 :  "Determinant: %o\n", Determinant(Matrix([[ MonomialCoefficient(t, var) : var in [x1,x2,x3] ] : t in T ]));
 
 	    C := Evaluate(C, T);
             gcd_den := GCD([ Denominator(coeff) : coeff in Coefficients(C) ]);
             gcd_num := GCD([ Numerator(coeff) : coeff in Coefficients(C) ]);
             C *:= (gcd_den/gcd_num);
             _<x1,x2,x3> := Parent(C);
-	    vprintf G3Twists, 1 :  "After minimization and cluster reduction, we get the conic\n%o\n", C;
 
             Q := Evaluate(Q, T);
             gcd_den := GCD([ Denominator(coeff) : coeff in Coefficients(Q) ]);
             gcd_num := GCD([ Numerator(coeff) : coeff in Coefficients(Q) ]);
             Q *:= (gcd_den/gcd_num);
-	    vprintf G3Twists, 1 :  "together with the quartic\n%o\n", Q;
 
+            vprintf G3Twists, 1 :  "Conic after reduction steps: %o\n", C;
+            vprintf G3Twists, 1 :  "Quartic after reduction steps: %o\n", Q;
+            vprintf G3Twists, 1 :
+                "Factorization of conic discriminant after reduction: %o\n",
+                Factorization(Integers() ! Discriminant(Conic(ProjectiveSpace(Parent(C)), C)));
 	else
 	    R := FF!0;
 	end if;

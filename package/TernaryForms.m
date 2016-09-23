@@ -18,7 +18,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  Copyright 2016 R. Lercier, C. Ritzenthaler & J. Sijsling
+ *  Copyright 2016 R. Lercier, C. Ritzenthaler & J.R. Sijsling
  */
 
 /* Current transformation algorithm: */
@@ -145,6 +145,8 @@ function BinaryToTernary(bs);
     f := &+[ w[1, i] * monst[i] : i in [1..15] ];
     return f;
 end function;
+
+/* Conjugating objects by Galois automorphisms: */
 
 function ConjugateForm(sigma, f);
     return &+[ sigma(MonomialCoefficient(f, mon)) * mon : mon in Monomials(f) ];

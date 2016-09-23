@@ -1,3 +1,29 @@
+/***
+ *  Descent functionality for plane quartics.
+ *
+ *  Distributed under the terms of the GNU Lesser General Public License (L-GPL)
+ *                  http://www.gnu.org/licenses/
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation; either version 2.1 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  Copyright:
+ *  2004 M. Girard, C. Ritzenthaler
+ *  2006 D. Kohel
+ *  2016 R. Lercier, C. Ritzenthaler & J.R. Sijsling
+ */
+
 /* TODO: We restrict to generic case for now */
 
 import "TernaryForms.m": ConjugateForm, ConjugateMatrix, TransformForm;
@@ -57,14 +83,14 @@ while true do
                 nm := Norm(Determinant(B));
                 num := Abs(Numerator(nm));
                 den := Abs(Denominator(nm));
-                vprint Descent : "Checking coboundary for smallness...";
+                vprint Reconstruction : "Checking whether the coboundary is small...";
                 Fac_num := Factorization(num : MPQSLimit := 0, ECMLimit := ECMLimit);
                 Fac_den := Factorization(den : MPQSLimit := 0, ECMLimit := ECMLimit);
                 test := (FactorizationToInteger(Fac_num) eq num) and (FactorizationToInteger(Fac_den) eq den);
                 if test then
                     bp := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_den ]);
-                    vprint Descent : "Primes in coboundary:";
-                    vprint Descent : bp;
+                    vprint Reconstruction : "Primes in coboundary:";
+                    vprint Reconstruction : bp;
                     return B, bp;
                 end if;
             end if;
