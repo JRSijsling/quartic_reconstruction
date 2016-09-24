@@ -271,7 +271,7 @@ function Genus3ConicAndQuartic(JI : models := true, RationalModel := true)
 		GCD([Numerator(c) : c in Coefficients(Q)]);
 	    Q *:= ct;
 
-            vprintf G3Twists, 1 :
+            vprintf G3Twists, 2 :
                 "Factorization of conic discriminant before reduction: %o\n",
                 Factorization(Integers() ! Discriminant(Conic(ProjectiveSpace(Parent(C)), C)));
 
@@ -335,7 +335,7 @@ function Genus3ConicAndQuartic(JI : models := true, RationalModel := true)
 
             vprintf G3Twists, 1 :  "Conic after reduction steps: %o\n", C;
             vprintf G3Twists, 1 :  "Quartic after reduction steps: %o\n", Q;
-            vprintf G3Twists, 1 :
+            vprintf G3Twists, 2 :
                 "Factorization of conic discriminant after reduction: %o\n",
                 Factorization(Integers() ! Discriminant(Conic(ProjectiveSpace(Parent(C)), C)));
 	else

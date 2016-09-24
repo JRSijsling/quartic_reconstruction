@@ -62,7 +62,7 @@ return B;
 end function;
 
 
-function CoboundaryRandom(A : SmallCoboundary := true);
+function CoboundaryRandom(A : SmallCoboundary := true, BadPrimesList := []);
 
 L<s> := BaseRing(A);
 g := MinimalPolynomial(s);
@@ -83,13 +83,17 @@ while true do
                 nm := Norm(Determinant(B));
                 num := Abs(Numerator(nm));
                 den := Abs(Denominator(nm));
+                if #BadPrimesList ne 0 then
+                    num := num div &*[ p^Valuation(num, p) : p in BadPrimesList ];
+                    den := den div &*[ p^Valuation(den, p) : p in BadPrimesList ];
+                end if;
                 vprint Reconstruction : "Checking whether the coboundary is small...";
                 Fac_num := Factorization(num : MPQSLimit := 0, ECMLimit := ECMLimit);
                 Fac_den := Factorization(den : MPQSLimit := 0, ECMLimit := ECMLimit);
                 test := (FactorizationToInteger(Fac_num) eq num) and (FactorizationToInteger(Fac_den) eq den);
                 if test then
                     bp := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_den ]);
-                    vprint Reconstruction : "Primes in coboundary:";
+                    vprint Reconstruction : "Furhter primes in coboundary:";
                     vprint Reconstruction : bp;
                     return B, bp;
                 end if;
@@ -144,13 +148,13 @@ end while;
 end function;
 
 
-function Descent(f, b8 : RandomCoboundary := false, SmallCoboundary := true);
+function Descent(f, b8 : RandomCoboundary := false, SmallCoboundary := true, BadPrimesList := []);
 
 A := NormalizeCocycle(IsomorphismFromB8(b8));
 if not RandomCoboundary then
     B, bp := CoboundaryLinear(A);
 else
-    B, bp := CoboundaryRandom(A : SmallCoboundary := SmallCoboundary);
+    B, bp := CoboundaryRandom(A : SmallCoboundary := SmallCoboundary, BadPrimesList := BadPrimesList);
 end if;
 f0 := TransformForm(f, B);
 return f0 / Coefficients(f0)[1], bp;

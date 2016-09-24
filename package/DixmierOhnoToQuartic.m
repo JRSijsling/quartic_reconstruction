@@ -142,7 +142,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         f := BinaryToTernary([b8h, b4h, b0h]);
         vprint Reconstruction : "Descending...";
 	R<x1, x2, x3> := PolynomialRing(F, 3);
-        f, bp0_new := Descent(f, b8 : RandomCoboundary := true, SmallCoboundary := minimize);
+        f, bp0_new := Descent(f, b8 : RandomCoboundary := true, SmallCoboundary := minimize, BadPrimesList := bp0);
         f := R ! f;
         bp0 := Sort(bp0 cat [ p : p in bp0_new | not p in bp0 ]);
     end if;
