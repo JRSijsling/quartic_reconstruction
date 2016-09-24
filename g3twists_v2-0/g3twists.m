@@ -999,7 +999,7 @@ function G3ModelsInCharFF_G8_5(JI : geometric := false)
 end function;
 
 
-function G3Models(JI: geometric := false, models := true, RationalModel := false)
+function G3Models(JI: geometric := false, models := true, RationalModel :=  false, Deterministic := false)
 
     FF := Universe(JI);
     p := Characteristic(FF);
@@ -2012,7 +2012,7 @@ function G3Models(JI: geometric := false, models := true, RationalModel := false
     /*** General case ***/
     vprintf G3Twists, 1 : "Automorphism group C2 \n";
     aut := CyclicGroup(2);
-    f := Genus3ConicAndQuartic(JI : models := models, RationalModel := RationalModel);
+    f := Genus3ConicAndQuartic(JI : models := models, RationalModel := RationalModel, Deterministic := Deterministic);
     if models then
 	error if Type(f) eq BoolElt, "[G3Twists] None C2-model found !\n(do J8, J9 and J10 satisfy Shioda algebraic relations ?)";
 	twists := [f];
@@ -2125,7 +2125,7 @@ intrinsic DiscriminantFromShiodaInvariants(JI::SeqEnum) -> BoolElt
 
 end intrinsic;
 
-intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := false) -> CrvHyp, GrpPerm
+intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := false, Deterministic := false) -> CrvHyp, GrpPerm
     {Compute a genus 3 hyperelliptic curve and its automorphism group from given
     Shioda invariants if they are non-singular, "[], <>" is returned
     otherwise. For singular Shioda invariants, see the function
@@ -2146,7 +2146,7 @@ intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := f
     when 2:
 	if DiscriminantFromShiodaInvariants(JI) eq 0 then return [], <>; end if;
 
-	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel);
+	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel, Deterministic := Deterministic);
 	error if Type(twists[1]) eq BoolElt, "G3Twists error: none hyperelliptic curve found at JI = ", JI;
 
 	return HyperellipticCurve(twists[1]), aut;
@@ -2156,7 +2156,7 @@ intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := f
 
 	if DiscriminantFromShiodaInvariants(JI) eq 0 then return [], <>; end if;
 
-	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel);
+	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel, Deterministic := Deterministic);
 	error if Type(twists[1]) eq BoolElt, "G3Twists error: none hyperelliptic curve found at JI = ", JI;
 
 	return HyperellipticCurve(twists[1]), aut;
@@ -2166,7 +2166,7 @@ intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := f
 
 	if DiscriminantFromShiodaInvariants(JI) eq 0 then return [], <>; end if;
 
-	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel);
+	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel, Deterministic := Deterministic);
 	error if Type(twists[1]) eq BoolElt, "G3Twists error: none hyperelliptic curve found at JI = ", JI;
 
 	return HyperellipticCurve(twists[1]), aut;
@@ -2181,13 +2181,13 @@ intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := f
 
     if DiscriminantFromShiodaInvariants(JI) eq 0 then return [], <>; end if;
 
-    twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel);
+    twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel, Deterministic := Deterministic);
     error if Type(twists[1]) eq BoolElt, "G3Twists error: none hyperelliptic curve found at JI = ", JI;
 
     return HyperellipticCurve(twists[1]), aut;
 end intrinsic;
 
-intrinsic HyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum : RationalModel := false) -> SeqEnum, GrpPerm
+intrinsic HyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum : RationalModel := false, Deterministic := false) -> SeqEnum, GrpPerm
     {Compute from given Shioda invariants a list [f(x)], or [h(x),f(x)]
     depending on the characteristic of the based field, with f(x) of degree 7
     or 8.
@@ -2209,19 +2209,19 @@ intrinsic HyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum : RationalMod
     when 2:
 	require #JI eq 10 or #JI eq 7 or #JI eq 6 or #JI eq 5 : "JI must be of size 5, 6, 7 or 10";
 
-	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel);
+	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel, Deterministic := Deterministic);
 	return twists, aut;
 
     when 3:
 	require #JI eq 10 : "Argument must be a sequence of ten Shioda invariants (characteristic 3) : J2, ..., J10, J12.";
 
-	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel);
+	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel, Deterministic := Deterministic);
 	return twists, aut;
 
     when 7:
 	require #JI eq 13 : "Argument must be a sequence of thirteen Shioda invariants (characteristic 7) : J2, ..., J10, J11, J13, J14, J15.";
 
-	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel);
+	twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel, Deterministic := Deterministic);
 	return twists, aut;
 
     end case;
@@ -2233,12 +2233,12 @@ intrinsic HyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum : RationalMod
         JI := ChangeUniverse(JI,Rationals());
     end if;
 
-    twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel);
+    twists, aut := G3Models(JI : geometric := true, RationalModel := RationalModel, Deterministic := Deterministic);
 
     return twists, aut;
 end intrinsic;
 
-intrinsic HyperellipticPolynomialFromShiodaInvariants(JI::SeqEnum : RationalModel := false) -> RngUPolElt, GrpPerm
+intrinsic HyperellipticPolynomialFromShiodaInvariants(JI::SeqEnum : RationalModel := false, Deterministic := false) -> RngUPolElt, GrpPerm
     {Compute from given Shioda invariants a univariate polynomial f(x) with f of degree 8.
     The characteristic of the field must not be even
     (see HyperellipticPolynomialsFromShiodaInvariants for that case).
@@ -2260,7 +2260,7 @@ end intrinsic;
   * Twists
   *
   ********************************************************************/
-intrinsic TwistedHyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum[FldFinElt] : RationalModel := false) -> SeqEnum[CrvHyp], GrpPerm
+intrinsic TwistedHyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum[FldFinElt] : RationalModel := false, Deterministic := false) -> SeqEnum[CrvHyp], GrpPerm
     {Compute twisted  hyperelliptic polynomials and their automorphism groups from
     Shioda invariants.}
 
@@ -2292,7 +2292,7 @@ intrinsic TwistedHyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum[FldFin
 
     end case;
 
-    twists, aut := G3Models(JI : RationalModel := RationalModel);
+    twists, aut := G3Models(JI : RationalModel := RationalModel, Deterministic := Deterministic);
     return twists, aut;
 
 end intrinsic;

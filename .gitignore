@@ -3,6 +3,7 @@ calculations/*
 experiments/*
 g2twists_v1-3/*
 g3twists_v1-1/*
+genus3CM/*
 tointegrate/*
 *.sig
 *.swp

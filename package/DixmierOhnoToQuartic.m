@@ -54,6 +54,8 @@ import "AutStrataChar0Equations.m":
 import "AutStrataChar0Reconstruction.m":
     TernaryQuartic_S3_I12eq0, TernaryQuartic_C3,
     TernaryQuartic_D8_I12eq0, TernaryQuartic_D4_I12eq0;
+import "Descent.m":
+    IsomorphismFromB8, NormalizeCocycle;
 
 declare verbose Reconstruction, 2;
 
@@ -72,24 +74,24 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
     If the flag exact is set to true, then a ternary forms is returned whose
     Dixmier-Ohno invariants exactly equal DOInv (instead of merely being
     equal in the corresponding weighted projective space).
-    
+
     If the flag descent is set to true, then the curve is descended to its base
     field.
-    
+
     If the flag minimize is set to true, then over the rationals an effort is
     made to return as small a model as possible.
-    
+
     If the flag search_point is set to true, then the algorithm tries to find a
     rational point of the Mestre conic of the associated binary form.}
 
     vprint Reconstruction : "Start of quartic reconstruction.";
-    F := Parent(DO[1]);
+    I03,I06,I09,J09,I12,J12,I15,J15,I18,J18,I21,J21,I27 := Explode(DO);
+    F := Universe(DO);
     ratbase := (Characteristic(F) eq 0) and (F eq Rationals());
     bp0 := [];
     if ratbase then
-        vprint Reconstruction : "Factorizing numerator and denominator of I12...";
-        I12 := DO[5];
-        Fac_num := Factorization(Numerator(I12));
+	vprint Reconstruction : "Factorizing numerator and denominator of I12...";
+	Fac_num := Factorization(Numerator(I12));
         Fac_den := Factorization(Denominator(I12));
         bp0_new := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_den ]);
         bp0 := Sort(bp0 cat [ p : p in bp0_new | not p in bp0 ]);
@@ -108,44 +110,76 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         lambda1 := Parent(DO[1]) ! 1;
     end if;
 
-    vprint Reconstruction : "Reconstructing binary octic b_8...";
-    b8, lambda2 := HyperellipticPolynomialFromJointShiodaInvariants(JointShioda : search_point := search_point);
-    b8 *:= (1/lambda1) * lambda2;
-    /* Alternative version: */
-    //b8 *:= lambda2;
+    repeat
 
-    if b8 eq 0 then
-	error "[DixmierOhnoToQuartic] b_8 has a root of order >= 4, not yet implemented";
-    end if;
+	vprint Reconstruction : "Reconstructing binary octic b_8...";
+	b8, lambda2 := HyperellipticPolynomialFromJointShiodaInvariants(JointShioda : search_point := search_point, Deterministic := false);
+	b8 *:= (1/lambda1) * lambda2;
+	/* Alternative version: */
+	//b8 *:= lambda2;
 
-    vprint Reconstruction : "Reconstructed binary octic b_8:", Homogenization(b8 : degree := 8);
+	if b8 eq 0 then
+	    error "[DixmierOhnoToQuartic] b_8 has a root of order >= 4, not yet implemented";
+	end if;
 
-    vprint Reconstruction : "Reconstructing binary quartic b_4...";
-    b4 := DixmierOhnoToBinaryQuartic(DO, b8);
-    /* Alternative version: */
-    //b4 := DixmierOhnoToBinaryQuartic(DO, b8 : lambda := lambda1);
-    vprint Reconstruction : "Reconstructed binary quartic b_4:", Homogenization(b4 : degree := 4);
+	vprint Reconstruction : "Reconstructed binary octic b_8:", Homogenization(b8 : degree := 8);
 
-    S := PolynomialRing(CoefficientRing(b4), 2);
-    b8h := S ! Homogenization(b8 : degree := 8);
-    b4h := S ! Homogenization(b4 : degree := 4);
-    b0h := S ! DO[3];
-    /* Alternative version: */
-    //b0h := S ! (lambda1^(-8) * DO[3]);
-    vprint Reconstruction : "Reconstructed constant b_0:", b0h;
+	vprint Reconstruction : "Reconstructing binary quartic b_4...";
+	b4 := DixmierOhnoToBinaryQuartic(DO, b8);
+	/* Alternative version: */
+	//b4 := DixmierOhnoToBinaryQuartic(DO, b8 : lambda := lambda1);
+	vprint Reconstruction : "Reconstructed binary quartic b_4:", Homogenization(b4 : degree := 4);
 
-    vprint Reconstruction : "Final inversion...";
-    if not descent or &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ b8h, b4h, b0h ] ] ) then
-        R<x1, x2, x3> := PolynomialRing(F, 3);
-        f := R ! BinaryToTernary([b8h, b4h, b0h]);
-    else
-        f := BinaryToTernary([b8h, b4h, b0h]);
-        vprint Reconstruction : "Descending...";
-	R<x1, x2, x3> := PolynomialRing(F, 3);
-        f, bp0_new := Descent(f, b8 : RandomCoboundary := true, SmallCoboundary := minimize, BadPrimesList := bp0);
-        f := R ! f;
-        bp0 := Sort(bp0 cat [ p : p in bp0_new | not p in bp0 ]);
-    end if;
+	S := PolynomialRing(CoefficientRing(b4), 2);
+	b8h := S ! Homogenization(b8 : degree := 8);
+	b4h := S ! Homogenization(b4 : degree := 4);
+	b0h := S ! DO[3];
+	/* Alternative version: */
+	//b0h := S ! (lambda1^(-8) * DO[3]);
+	vprint Reconstruction : "Reconstructed constant b_0:", b0h;
+
+	vprint Reconstruction : "Final inversion...";
+	if not descent or &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ b8h, b4h, b0h ] ] ) then
+	    R := PolynomialRing(F, 3);
+	    f := R ! BinaryToTernary([b8h, b4h, b0h]);
+	    break;
+	end if;
+
+	f := BinaryToTernary([b8h, b4h, b0h]);
+
+	if ratbase then
+
+	    vprint Reconstruction : "Conjugate isomorphism A...";
+	    A := NormalizeCocycle(IsomorphismFromB8(b8));
+
+	    _, ANormDen := IsSquare(Abs(Denominator(Norm(Determinant(A+Parent(A)!1)))));
+	    ANormDen := ANormDen div &*[ p^Valuation(ANormDen, p) : p in bp0 ];
+
+	    vprintf Reconstruction, 1 : "Lazy factorization of ANormDen (%o digits)\n", Ceiling(Log(10, ANormDen));
+	    Fac_ANormDen := Factorization(ANormDen
+		: MPQSLimit := 0, ECMLimit := 10^4, PollardRhoLimit := 10^4, Bases := 10,  Proof := false
+		);
+
+	    vprintf Reconstruction, 2 : "Found %o\n", Fac_ANormDen;
+
+	    ANormDenFact := FactorizationToInteger(Fac_ANormDen);
+	end if;
+
+	if not ratbase or ANormDenFact eq ANormDen then
+	    bp0 := Sort(bp0 cat [ p : p in [ fac[1] : fac in Fac_ANormDen ] | not p in bp0 ]);
+
+	    vprint Reconstruction : "ANormDen completely factorized, let us descend...";
+
+	    R := PolynomialRing(F, 3);
+	    f, bp0_new := Descent(f, b8 : Isomorphism := A, RandomCoboundary := true, SmallCoboundary := minimize, BadPrimesList := bp0);
+	    f := R ! f;
+
+	    bp0 := Sort(bp0 cat [ p : p in bp0_new | not p in bp0 ]);
+	    break;
+	end if;
+
+	vprintf Reconstruction, 1 : "Uncomplete factorization -  a cofactor of %o digit remains - let us start from another b8", Ceiling(Log(10, ANormDen div ANormDenFact));
+    until false;
 
     /* Simplify over the rationals by removing content and apply MinimizeReduce : */
     if ratbase then
@@ -154,28 +188,34 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         f *:= (gcd_den/gcd_num);
         lcm_num := LCM([ Denominator(coeff) : coeff in Coefficients(f) ]);
         f *:= lcm_num;
-        vprint Reconstruction : "A first model over the rationals is given by";
-        vprint Reconstruction : f;
+        vprintf Reconstruction,1 : "A first model over the rationals is given by %o\n", f;
+
         if minimize then
-            vprint Reconstruction : "Reducing coefficients...";
-            f := MinimizeReducePlaneQuartic(f : BadPrimesList := bp0, ImproveFurther := true);
+	    vprint Reconstruction : "Reducing coefficients...";
+
+            f := MinimizeReducePlaneQuartic(f : BadPrimesList := bp0,
+		ImproveFurther := true);
         end if;
-        R<x1, x2, x3> := PolynomialRing(F, 3);
-        f := R ! f;
+        R := PolynomialRing(F, 3);
+	f := R ! f;
     end if;
 
-    if not exact then
-        return f, TernaryToBinary(f);
-    else
+    if exact then
         /* Scale via the 3-4 trick: */
         W := [ 3, 6, 9, 9, 12, 12, 15, 15, 18, 18, 21, 21, 27 ];
         indices := [ i : i in [1..#DO] | DO[i] ne 0 ];
         gcd, L := XGCDUnique([ W[i] : i in indices ]);
         I := DixmierOhnoInvariants(f);
-        lambda3 := &*[ (DO[i] / I[i])^(L[i]) : i in indices ];
+	lambda3 := &*[ (DO[i] / I[i])^(L[i]) : i in indices ];
+	x1 := R.1; x2 := R.2; x3 := R.3;
         f := (1/lambda3) * Evaluate(f, [ lambda3*x1, x2, x3 ]);
         return f, TernaryToBinary(f);
     end if;
+
+    DOF, DOWght := DixmierOhnoInvariants(f : normalize := true);
+
+    return f, TernaryToBinary(f);
+
 end intrinsic;
 
 
@@ -209,7 +249,7 @@ function XGCDUnique(L)
 end function;
 
 
-function HyperellipticPolynomialFromJointShiodaInvariants(JS : search_point := true)
+function HyperellipticPolynomialFromJointShiodaInvariants(JS : search_point := true, Deterministic := false)
 
     vprint Reconstruction : "Converting joint invariants to Shioda invariants...";
     S2, S3, S4, S5, S6, S7, S8, S9, S10 := Explode(ShiodaInvariantsFromJointShiodaInvariants(JS));
@@ -229,7 +269,7 @@ function HyperellipticPolynomialFromJointShiodaInvariants(JS : search_point := t
     end if;
 
     vprint Reconstruction : "Determining non-twisted binary octic from Shioda invariants...";
-    b8 := HyperellipticPolynomialFromShiodaInvariants([S2, S3, S4, S5, S6, S7, S8, S9, S10] : RationalModel := search_point);
+    b8 := HyperellipticPolynomialFromShiodaInvariants([S2, S3, S4, S5, S6, S7, S8, S9, S10] : RationalModel := search_point, Deterministic := Deterministic);
     K := BaseRing(Parent(b8));
     r := K.1;
     vprint Reconstruction, 2 : "Reconstructed non-twisted binary octic:", Homogenization(b8 : degree := 8);
@@ -320,7 +360,7 @@ end function;
 
 function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
     /* Coefficient ring plus deformation: */
-    Pa<a0, a1, a2, a3, a4> := PolynomialRing(CoefficientRing(b8), 5);
+    Pa := PolynomialRing(CoefficientRing(b8), 5);
     Pt := PolynomialRing(Pa); t := Pt.1;
 
     /* JRS: I trust you (so I have not changed anything) but I am a bit afraid
@@ -438,13 +478,13 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
     If the flag exact is set to true, then a ternary forms is returned whose
     Dixmier-Ohno invariants exactly equal DOInv (instead of merely being
     equal in the corresponding weighted projective space).
-    
+
     If the flag descent is set to true, then the curve is descended to its base
     field.
-    
+
     If the flag minimize is set to true, then over the rationals an effort is
     made to return as small a model as possible.
-    
+
     If the flag search_point is set to true, then the algorithm tries to find a
     rational point of the Mestre conic of the associated binary form.}
 

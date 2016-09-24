@@ -35,12 +35,12 @@ end function;
 /* From form to polynomials and back: */
 
 function Dehomogenization(b);
-    S<t> := PolynomialRing(BaseRing(Parent(b)));
+    S := PolynomialRing(BaseRing(Parent(b))); t := S.1;
     return S ! Evaluate(b, [t, 1]);
 end function;
 
 function Homogenization(f : degree := Degree(f));
-    R<z1, z2> := PolynomialRing(BaseRing(Parent(f)), 2);
+    R := PolynomialRing(BaseRing(Parent(f)), 2); z1 := R.1; z2 := R.2;
     return R ! (z2^degree * Evaluate(f, z1/z2));
 end function;
 
@@ -69,7 +69,7 @@ function QuadricNormalizer(Q)
     Delta := (a*d*f - 1/4*a*e^2 - 1/4*b^2*f + 1/4*b*c*e - 1/4*c^2*d);
     test, r := IsSquare(-a*Delta);
     if not test then
-        P<u> := PolynomialRing(R);
+        P := PolynomialRing(R); u := P.1;
 	r := FieldOfFractions(quo<P | u^2 + a*Delta>).1;
     end if;
     T1 := Matrix([[1, b/(2*a), 0], [0, 1, 0], [0, c/(2*a), 1]]);

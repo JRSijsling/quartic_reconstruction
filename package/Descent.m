@@ -28,9 +28,6 @@
 
 import "TernaryForms.m": ConjugateForm, ConjugateMatrix, TransformForm;
 
-declare verbose Descent, 1;
-
-
 function GL2ToGL3(U);
     a,b,c,d := Explode(U);
     return Matrix([[a^2, a*b, b^2], [2*a*c, a*d + b*c, 2*b*d], [c^2, c*d, d^2]]);
@@ -39,7 +36,7 @@ end function;
 
 function IsomorphismFromB8(b8);
 
-L<s> := BaseRing(Parent(b8));
+L := BaseRing(Parent(b8)); s := L.1;
 g := MinimalPolynomial(s);
 sigma := hom<L -> L | -Coefficient(g,1) - s>;
 test, L := IsGL2GeometricEquivalent(b8, ConjugateForm(sigma, b8), 8 : geometric := false);
@@ -50,7 +47,7 @@ end function;
 
 function NormalizeCocycle(A);
 
-L<s> := BaseRing(A);
+L := BaseRing(A); s := L.1;
 g := MinimalPolynomial(s);
 sigma := hom<L -> L | -Coefficient(g,1) - s>;
 prod := A * ConjugateMatrix(sigma, A);
@@ -64,99 +61,192 @@ end function;
 
 function CoboundaryRandom(A : SmallCoboundary := true, BadPrimesList := []);
 
-L<s> := BaseRing(A);
-g := MinimalPolynomial(s);
-sigma := hom<L -> L | -Coefficient(g,1) - s>;
+    vprintf Reconstruction, 1 : "Looking for a couboundary with Serre's algorithm\n";
 
-counter := 0;
-Bound := 1;
-ECMLimit := 5000;
-D := [-Bound..Bound];
-while true do
-    for i:=1 to (Bound + 1)^3 do
-        B0 := Matrix(BaseRing(A), [ [ Random(D) + Random(D)*s : c in Eltseq(row) ] : row in Rows(A) ]);
-        B := B0 + A * ConjugateMatrix(sigma, B0);
-        if Rank(B) eq Rank(A) then
-            if not SmallCoboundary then
-                return B, [];
-            else
-                nm := Norm(Determinant(B));
-                num := Abs(Numerator(nm));
-                den := Abs(Denominator(nm));
-                if #BadPrimesList ne 0 then
-                    num := num div &*[ p^Valuation(num, p) : p in BadPrimesList ];
-                    den := den div &*[ p^Valuation(den, p) : p in BadPrimesList ];
-                end if;
-                vprint Reconstruction : "Checking whether the coboundary is small...";
-                Fac_num := Factorization(num : MPQSLimit := 0, ECMLimit := ECMLimit);
-                Fac_den := Factorization(den : MPQSLimit := 0, ECMLimit := ECMLimit);
-                test := (FactorizationToInteger(Fac_num) eq num) and (FactorizationToInteger(Fac_den) eq den);
-                if test then
-                    bp := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_den ]);
-                    vprint Reconstruction : "Furhter primes in coboundary:";
-                    vprint Reconstruction : bp;
-                    return B, bp;
-                end if;
-            end if;
-        end if;
-    end for;
-    ECMLimit +:= 1000;
-    counter +:= 1;
-    if counter mod 4 eq 0 then
-        Bound +:= 1;
+    L := BaseRing(A); s := L.1;
+    g := MinimalPolynomial(s);
+    sigma := hom<L -> L | -Coefficient(g,1) - s>;
+
+    Bound := 2;
+    ECMLimit := 1000;
+    D := [-Bound..Bound];
+
+    nb := 0; while true do
+	TT := Cputime();
+	nb +:= 1;
+	vprintf Reconstruction, 1 : "\nDescent try %o :\n", nb;
+
+	B0 := Matrix(BaseRing(A), [ [ ( Random(D) + Random(D)*s ) : c in Eltseq(row) ] : row in Rows(A) ]);
+	B := B0 + A * ConjugateMatrix(sigma, B0);
+
+	if Rank(B) eq Rank(A) then
+	    if not SmallCoboundary then
+		return B;
+	    else
+
+		nm := Norm(Determinant(B));
+		ret, nm := IsSquare(nm); 		/* nm is a square */
+
+		num := Abs(Numerator(nm)); den := Abs(Denominator(nm));
+
+		if #BadPrimesList ne 0 then
+		    num := num div &*[ p^Valuation(num, p) : p in BadPrimesList ];
+		    den := den div &*[ p^Valuation(den, p) : p in BadPrimesList ];
+		end if;
+
+		vprintf Reconstruction, 1 : "Checking coboundary for smallness (%o digits / %o digits)...\n", Ceiling(Log(10, num)), Ceiling(Log(10, den));
+
+		vprintf Reconstruction, 2 : "den reduced := %o\n", den;
+
+		Fac_den := Factorization(den
+		    : MPQSLimit := 0, ECMLimit := ECMLimit, PollardRhoLimit := 10^4, Bases := 10,  Proof := false
+		    );
+
+		if (FactorizationToInteger(Fac_den) eq den) then
+
+		    vprintf Reconstruction, 2 : "den completely factorized, now num := %o;\n", num;
+
+		    Fac_num := Factorization(num : MPQSLimit := 0, ECMLimit
+			:= ECMLimit, PollardRhoLimit := 10^4, Bases := 10, Proof := false);
+
+		    if (FactorizationToInteger(Fac_num) eq num) then
+			vprintf Reconstruction, 2 : "This num is also completely factorized\n\n";
+
+			vprintf Reconstruction, 1 : "So, we found a smooth descent morphism B, let us return it :-)\n";
+
+			bp := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_den ]);
+			vprint Reconstruction : "Further primes in coboundary:";
+			vprint Reconstruction : bp;
+
+			// print "Cocycle works?";
+			//print A * ConjugateMatrix(sigma, B) eq B;
+
+			return B, bp;
+		    end if;
+
+		    vprintf Reconstruction, 1 :
+			"%o digits / %o digits remained... (%o s)\n\n",
+			Ceiling(Log(10, num div FactorizationToInteger(Fac_num))),
+			Ceiling(Log(10, den div
+			FactorizationToInteger(Fac_den))),
+			Cputime(TT);
+
+		else
+
+		    vprintf Reconstruction, 1 :
+			"? / %o digits remained... (%o s)\n\n",
+			Ceiling(Log(10, den div FactorizationToInteger(Fac_den))),
+			Cputime(TT);
+
+		end if;
+
+	    end if;
+	end if;
+
+    end while;
+
+end function;
+
+
+function CoboundaryLinear(A : BadPrimesList := []);
+    // Not great, finally...
+
+    vprintf Reconstruction, 1 : "Looking for a couboundary with LLL\n";
+
+    L := BaseRing(A); s := L.1;
+    g := MinimalPolynomial(s);
+    g1 := Coefficient(g,1);
+    sigma := hom<L -> L | -g1 - s>;
+
+    BB := [ Matrix(L, 3, 3, [ KroneckerDelta(i, j) : j in [1..9] ]) : i in [1..9] ]
+	cat [ Matrix(L, 3, 3, [ s * KroneckerDelta(i, j) : j in [1..9] ]) : i
+	in [1..9] ];
+
+    Id := IdentityMatrix(L, 9);
+    Sigma := HorizontalJoin(
+	VerticalJoin(Id, -g1*Id),
+	VerticalJoin(0*Id, -Id)
+	);
+
+    ASplit1 := Matrix(L, [ Eltseq(A * b) : b in BB ]);
+
+    ASplit2 := HorizontalJoin(
+	Matrix(L, [ [ Eltseq(c)[1] : c in Eltseq(row) ] : row in Rows(ASplit1)]),
+	Matrix(L, [ [ Eltseq(c)[2] : c in Eltseq(row) ] : row in Rows(ASplit1) ])
+	);
+    K := Kernel(Sigma * ASplit2 - 1);
+
+    if BaseRing(L) eq Rationals() then
+	Lat := Lattice(Matrix(Rationals(), [ [ Rationals() ! c : c in Eltseq(K.i) ] : i in [1..Dimension(K)] ]));
+	Lat := LLL(Lat);
+	Lat *:= BasisDenominator(Lat);
     end if;
-end while;
+
+    Bound := 2;
+    D := [-Bound..Bound];
+    while true do
+
+	v := &+[ Random(D) * Lat.i : i in [1..Rank(Lat)] ];
+	B := &+[ v[i] * BB[i] : i in [1..#BB] ];
+	if Rank(B) eq Rank(A) then
+	    //		print "Cocycle works?";
+	    //		print A * ConjugateMatrix(sigma, B) eq B;
+
+	    nm := Norm(Determinant(B));
+	    ret, nm := IsSquare(nm);	    /* nm is a square */
+
+	    num := Abs(Numerator(nm));
+	    if #BadPrimesList ne 0 then
+		num := num div &*[ p^Valuation(num, p) : p in BadPrimesList ];
+	    end if;
+
+	    vprintf Reconstruction, 1 : "Checking coboundary for smallness (%o digits)...\n", Ceiling(Log(10, num));
+	    vprintf Reconstruction, 1 : "num := %o\n", num;
+
+	    Fac_num := Factorization(num : MPQSLimit := 0, ECMLimit := 10^3, PollardRhoLimit := 10^4, Bases := 4, Proof := false);
+	    vprintf Reconstruction, 1 :
+		"%o digits remained... \n\n",
+		Ceiling(Log(10, num div FactorizationToInteger(Fac_num)));
+
+
+	    if (FactorizationToInteger(Fac_num) eq num) then
+		vprintf Reconstruction, 2 : "This num is also completely factorized\n\n";
+
+		vprintf Reconstruction, 1 : "So, we found a smooth descent morphism B, let us return it :-)\n";
+
+		bp := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_num ]);
+		vprint Reconstruction : "Further primes in coboundary:";
+		vprint Reconstruction : bp;
+
+		// print "Cocycle works?";
+		//print A * ConjugateMatrix(sigma, B) eq B;
+
+		return B, bp;
+	    end if;
+
+	end if;
+    end while;
 
 end function;
 
 
-function CoboundaryLinear(A);
-// Slightly better, but still not great because the LLL step underperforms.
 
-L<s> := BaseRing(A);
-g := MinimalPolynomial(s);
-sigma := hom<L -> L | -Coefficient(g,1) - s>;
-r := (Coefficient(g,1)/2) + s;
+function Descent(f, b8 : Isomorphism := false, RandomCoboundary := false, SmallCoboundary := true, BadPrimesList := []);
 
-BB := [ Matrix(L, 3, 3, [ KroneckerDelta(i, j) : j in [1..9] ]) : i in [1..9] ]
-cat [ Matrix(L, 3, 3, [ r * KroneckerDelta(i, j) : j in [1..9] ]) : i in [1..9] ];
-Sigma := DiagonalMatrix(L, [ 1 : i in [1..9] ] cat [ -1 : i in [1..9] ]);
-ASplit1 := Matrix(L, [ Eltseq(A * b) : b in BB ]);
-ASplit2 := HorizontalJoin(Matrix(L, [ [ (c + sigma(c))/2 : c in Eltseq(row) ] : row in Rows(ASplit1) ]), Matrix(L, [ [ (c - sigma(c))/(2*r) : c in Eltseq(row) ] : row in Rows(ASplit1) ]));
-K := Kernel(Sigma * ASplit2 - 1);
+    if Type(Isomorphism) eq BoolElt then
+	A := NormalizeCocycle(IsomorphismFromB8(b8));
+    else
+	A := Isomorphism;
+    end if;
 
-if BaseRing(L) eq Rationals() then
-    Lat := Lattice(Matrix(Rationals(), [ [ Rationals() ! c : c in Eltseq(K.i) ] : i in [1..Dimension(K)] ]));
-    Lat := LLL(Lat);
-end if;
+    if not RandomCoboundary then
+	B, bp := CoboundaryLinear(A);
+    else
+	B, bp := CoboundaryRandom(A : SmallCoboundary := SmallCoboundary, BadPrimesList := BadPrimesList);
+    end if;
 
-B := 1;
-D := [-B..B];
-while true do
-    for i:=1 to 16 do
-        v := &+[ Random(D) * Lat.i : i in [1..Rank(Lat)] ];
-        B := &+[ v[i] * BB[i] : i in [1..#BB] ];
-        if Rank(B) eq Rank(A) then
-            //print "Cocycle works?";
-            //print A * ConjugateMatrix(sigma, B) eq B;
-            return B, [];
-        end if;
-    end for;
-    B +:= 1;
-end while;
+    f0 := TransformForm(f, B);
 
-end function;
-
-
-function Descent(f, b8 : RandomCoboundary := false, SmallCoboundary := true, BadPrimesList := []);
-
-A := NormalizeCocycle(IsomorphismFromB8(b8));
-if not RandomCoboundary then
-    B, bp := CoboundaryLinear(A);
-else
-    B, bp := CoboundaryRandom(A : SmallCoboundary := SmallCoboundary, BadPrimesList := BadPrimesList);
-end if;
-f0 := TransformForm(f, B);
-return f0 / Coefficients(f0)[1], bp;
+    return f0 / Coefficients(f0)[1], bp;
 
 end function;

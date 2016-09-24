@@ -498,8 +498,8 @@ function DixmierInvariant(Phi,i :IntegralNormalization := false)
     PXYZ := Parent(Phi);
     XYZ_orig := [ PXYZ.i : i in [1..3] ];
     K := BaseRing(PXYZ);
-    PUVW<u,v,w> := PolynomialRing(K,3);
-    PXYZUVW<X,Y,Z> := PolynomialRing(PUVW,3);
+    PUVW:= PolynomialRing(K,3); u := PUVW.1; v := PUVW.2; w := PUVW.3;
+    PXYZUVW := PolynomialRing(PUVW,3); X := PXYZUVW.1; Y := PXYZUVW.2; Z := PXYZUVW.3;
     Q := Evaluate(Phi,[X,Y,Z]);
     L := u*X+v*Y+w*Z;
 

@@ -144,7 +144,7 @@ end function;
 
 */
 
-function FindPointOnConic(L : RationalPoint := true, RandomLine := false, Legendre := false, B := 1)
+function FindPointOnConic(L : RationalPoint := true, RandomLine := true, Legendre := false, B := 100)
     /* B is the maximal height of the integral coefficients of the intersecting line. */
 
     K := BaseRing(Parent(L));
@@ -232,7 +232,7 @@ function TransformForm(f, T : co := true, contra := false)
     return Evaluate(f, Eltseq(ChangeRing(T, R) * vars));
 end function;
 
-function Genus3ConicAndQuartic(JI : models := true, RationalModel := true)
+function Genus3ConicAndQuartic(JI : models := true, RationalModel := true, Deterministic := false)
 
     FF := Universe(JI);
 
@@ -395,7 +395,9 @@ function Genus3ConicAndQuartic(JI : models := true, RationalModel := true)
 
 */
 
-	phi := FindPointOnConic(C : RationalPoint := RationalModel);
+	phi := FindPointOnConic(C :
+	    RationalPoint := RationalModel,
+	    RandomLine := not Deterministic);
 
 	f := Evaluate(Q, DefiningPolynomials(phi));
 
