@@ -18,6 +18,7 @@ intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt : BadPrimesList := [], Impr
  require IsSmoothHyperSurface(f) : "Curve is singular.";
  require (Degree(f) eq 4) and IsHomogeneous(f) : "Homogeneous polynomial of degree 4 expected.";
 
+ vprintf PlaneQuartic,1: "Starting Elsenhans reduction. %o\n",res;
  subs := [Parent(f).i : i in [1..3]];
  res := f div GCD(Coefficients(f));
  for p in [2,3,5] cat [ q : q in BadPrimesList | not q in [2,3,5] ] do

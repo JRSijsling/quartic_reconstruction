@@ -178,7 +178,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
 	    break;
 	end if;
 
-	vprintf Reconstruction, 1 : "Uncomplete factorization -  a cofactor of %o digit remains - let us start from another b8", Ceiling(Log(10, ANormDen div ANormDenFact));
+	vprintf Reconstruction, 1 : "Uncomplete factorization -  a cofactor of %o digit remains - let us start from another b8\n", Ceiling(Log(10, ANormDen div ANormDenFact));
     until false;
 
     /* Simplify over the rationals by removing content and apply MinimizeReduce : */

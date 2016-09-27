@@ -20,12 +20,23 @@ AttachSpec("~/Programs/Reconstruction/g3twists\_v2-0/spec");
 A bug fix
 ---------
 
-The functionality also uses the Magma algorithm MinimizeReducePlaneQuartic, due to Elsenhans, Stoll et al., to simplify any output over the rationals. In order for this to work properly, one needs a bug fix / improvement of the file magma/package/Geometry/SrfDP/, which can be found in BugFix.m.
+The functionality also uses the Magma algorithm MinimizeReducePlaneQuartic, due to Elsenhans and Stoll, to simplify any output over the rationals. In order for this to work properly, one needs a bug fix of the file magma/package/Geometry/SrfDP/, which can be found in BugFix.m.
+
+The papers in which the methods used in this fundamental algorithm are described are:
+
+Andreas-Stephan Elsenhans  
+*Good models for cubic surfaces*  
+Preprint at [https://math.uni-paderborn.de/fileadmin/mathematik/AG-Computeralgebra/Preprints-elsenhans/red_5.pdf](https://math.uni-paderborn.de/fileadmin/mathematik/AG-Computeralgebra/Preprints-elsenhans/red_5.pdf "https://math.uni-paderborn.de/fileadmin/mathematik/AG-Computeralgebra/Preprints-elsenhans/red_5.pdf")
+
+Michael Stoll  
+*Reduction theory of point clusters in projective space*  
+Groups Geom. Dyn. 5 (2011), no. 2, 553-565  
+Preprint at [http://arxiv.org/abs/0909.2808](http://arxiv.org/abs/0909.2808 "http://arxiv.org/abs/0909.2808")
 
 Usage
 -----
 
-An example that tests the routines in this package can be found in Example.m. As in that file, more verbose comments during the your run can be enable by
+An example that tests the routines in this package can be found in Example.m. As in that file, more verbose comments during the your run can be enabled by
 
 SetVerbose("Reconstruction", n);
 
@@ -38,4 +49,4 @@ If you have used this code and it has been helpful, then please consider citing 
 
 Reynald Lercier, Christophe Ritzenthaler, and Jeroen Sijsling  
 *Reconstructing plane quartic from their invariants*  
-[http://arxiv.org/abs/1606.05594](http://arxiv.org/abs/1606.05594 "http://arxiv.org/abs/1606.05594")
+Preprint at [http://arxiv.org/abs/1606.05594](http://arxiv.org/abs/1606.05594 "http://arxiv.org/abs/1606.05594")

@@ -30,7 +30,7 @@ SetVerbose("PlaneQuartic", 1);
 SetVerbose("ClusterReduction", 1);
 
 /* Start from a random ternary quartic */
-F := Rationals();  B := 2^7; Domain := [-B..B];
+F := Rationals();  B := 2^20; Domain := [-B..B];
 //F := GF(NextPrime(10^5));  Domain := F;
 R<x1, x2, x3> := PolynomialRing(F, 3);
 repeat
@@ -47,6 +47,7 @@ DOf_norm := WPSNormalize(DOWght, DOf);
 
 /* Construct another quartic with equivalent invariants */
 g, aut, twists := TernaryQuarticFromDixmierOhnoInvariants(DOf);
+_<x1,x2,x3> := Parent(g);
 print "";
 print "The reconstructed curve is g =", g;
 print "Automorphism group", aut;
