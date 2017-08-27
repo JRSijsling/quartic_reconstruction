@@ -98,14 +98,16 @@ function G3ModelsInCharFF_D4(JI : geometric := false, RationalModel := false)
     /* Can we realize this curve with a normal model */
     normalmodel, t := IsSquare(d);
     if not normalmodel then
-	P3 := PolynomialRing(FF, 3); A := P3.1; B := P3.2; C := P3.3;
+	P2 := ProjectiveSpace(FF, 2); A := P2.1; B := P2.2; C := P2.3;
 	Cn := 4*I2a^2*I2b*B^2-I2a*C^2-I3^2*B^2+A^2;
 
-	a, b := FindPointOnConic(Cn : RationalPoint:=RationalModel);
-	if not a in FF or not b in FF then
+	HasRatPoint, Pt := HasRationalPoint(Conic(P2, Cn));
+	if not HasRatPoint then
 	    K2 := ExtensionField<FF, x| x^2 - d>; t := K2.1;
 	    x := PolynomialRing(K2).1;
 	    normalmodel := true;
+	else
+	    a,b,_ := Explode(Eltseq(Pt));
 	end if;
 
     end if;
@@ -127,9 +129,7 @@ function G3ModelsInCharFF_D4(JI : geometric := false, RationalModel := false)
     end if;
 
     /* Can we realize this curve with a twisted normal model ? */
-    X := PolynomialRing(Parent(a)).1;
-
-    Pt := X^2-(-4*I2a^2*I2b+I3^2);
+    Pt := x^2-(-4*I2a^2*I2b+I3^2);
     Ft := Sort(Factorization(Pt), func<x, y| Degree(x[1]) - Degree(y[1])>);
 
     Pt := Ft[1, 1]; Pt /:= Coefficient(Pt, Degree(Pt));

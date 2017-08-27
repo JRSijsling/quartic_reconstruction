@@ -274,7 +274,7 @@ intrinsic ShiodaInvariants(fh::SeqEnum : normalize := false, scaled := true) -> 
 	return ShiodaInvariantsChar2(f, h : normalize := normalize);
     end if;
 
-    return ShiodaInvariants(f-(1/4)*h^2 : normalize := normalize);
+    return ShiodaInvariants(4*f+h^2 : normalize := normalize);
 
 end intrinsic;
 
@@ -297,7 +297,7 @@ intrinsic ShiodaInvariants(C::CrvHyp : normalize := false) -> SeqEnum, SeqEnum
 	return ShiodaInvariants([f, h] : normalize := normalize);
     end if;
 
-    return ShiodaInvariants(f-(1/4)*h^2 : normalize := normalize);
+    return ShiodaInvariants(4*f+h^2 : normalize := normalize);
 
 end intrinsic;
 

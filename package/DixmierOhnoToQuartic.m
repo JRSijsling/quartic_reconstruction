@@ -87,7 +87,8 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
     vprint Reconstruction : "Start of quartic reconstruction.";
     I03,I06,I09,J09,I12,J12,I15,J15,I18,J18,I21,J21,I27 := Explode(DO);
     F := Universe(DO);
-    ratbase := (Characteristic(F) eq 0) and (F eq Rationals());
+
+    ratbase := (Type(F) eq FldRat) and (F eq Rationals());
     bp0 := [];
     if ratbase then
 	vprint Reconstruction : "Factorizing numerator and denominator of I12...";
@@ -111,7 +112,6 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
     end if;
 
     repeat
-
 	vprint Reconstruction : "Reconstructing binary octic b_8...";
 	b8, lambda2 := HyperellipticPolynomialFromJointShiodaInvariants(JointShioda : search_point := search_point, Deterministic := false);
 	b8 *:= (1/lambda1) * lambda2;
@@ -139,46 +139,53 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
 	vprint Reconstruction : "Reconstructed constant b_0:", b0h;
 
 	vprint Reconstruction : "Final inversion...";
-	if not descent or &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ b8h, b4h, b0h ] ] ) then
-	    R := PolynomialRing(F, 3);
-	    f := R ! BinaryToTernary([b8h, b4h, b0h]);
+	f := BinaryToTernary([b8h, b4h, b0h]);
+	"f is", f;
+
+	isDescended := &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ b8h, b4h, b0h ] ] );
+	if not descent or isDescended then
+	    if isDescended then f := PolynomialRing(F, 3)!f; end if;
 	    break;
 	end if;
 
-	f := BinaryToTernary([b8h, b4h, b0h]);
-
-	if ratbase then
-
-	    vprint Reconstruction : "Conjugate isomorphism A...";
-	    A := NormalizeCocycle(IsomorphismFromB8(b8));
-
-	    _, ANormDen := IsSquare(Abs(Denominator(Norm(Determinant(A+Parent(A)!1)))));
-	    ANormDen := ANormDen div &*[ p^Valuation(ANormDen, p) : p in bp0 ];
-
-	    vprintf Reconstruction, 1 : "Lazy factorization of ANormDen (%o digits)\n", Ceiling(Log(10, ANormDen));
-	    Fac_ANormDen := Factorization(ANormDen
-		: MPQSLimit := 0, ECMLimit := 10^4, PollardRhoLimit := 10^4, Bases := 10,  Proof := false
-		);
-
-	    vprintf Reconstruction, 2 : "Found %o\n", Fac_ANormDen;
-
-	    ANormDenFact := FactorizationToInteger(Fac_ANormDen);
+	if not ratbase then
+	    f := Descent(f, Parent(b4)!b8);
+	    "f =", f;
+	    f := PolynomialRing(F, 3)!f;
+	    break;
 	end if;
 
-	if not ratbase or ANormDenFact eq ANormDen then
-	    bp0 := Sort(bp0 cat [ p : p in [ fac[1] : fac in Fac_ANormDen ] | not p in bp0 ]);
+	vprint Reconstruction : "Conjugate isomorphism A...";
+	A := NormalizeCocycle(IsomorphismFromB8(b8 : RandomOne := true));
 
+	_, ANormDen := IsSquare(Abs(Denominator(Norm(Determinant(A+Parent(A)!1)))));
+	ANormDen := ANormDen div &*[ p^Valuation(ANormDen, p) : p in bp0 ];
+
+	vprintf Reconstruction, 1 : "Lazy factorization of ANormDen (%o digits)\n", Ceiling(Log(10, ANormDen));
+	Fac_ANormDen := Factorization(ANormDen
+	    : MPQSLimit := 0, ECMLimit := 10^4, PollardRhoLimit := 10^4, Bases := 10,  Proof := false
+	    );
+
+	vprintf Reconstruction, 2 : "Found %o\n", Fac_ANormDen;
+
+	ANormDenFact := FactorizationToInteger(Fac_ANormDen);
+
+	if ANormDenFact eq ANormDen then
 	    vprint Reconstruction : "ANormDen completely factorized, let us descend...";
-
+	    bp0 := Sort(bp0 cat [ p : p in [ fac[1] : fac in Fac_ANormDen ] | not p in bp0 ]);
 	    R := PolynomialRing(F, 3);
-	    f, bp0_new := Descent(f, b8 : Isomorphism := A, RandomCoboundary := true, SmallCoboundary := minimize, BadPrimesList := bp0);
+	    f, bp0_new := Descent(f, Parent(b4)!b8 : Isomorphism := A, RandomCoboundary := true, SmallCoboundary := minimize, BadPrimesList := bp0);
 	    f := R ! f;
 
 	    bp0 := Sort(bp0 cat [ p : p in bp0_new | not p in bp0 ]);
+
 	    break;
+
 	end if;
 
-	vprintf Reconstruction, 1 : "Uncomplete factorization -  a cofactor of %o digit remains - let us start from another b8\n", Ceiling(Log(10, ANormDen div ANormDenFact));
+	vprintf Reconstruction, 1 : "Uncomplete factorization -  a cofactor of %o digit remains - let us start from another b8", Ceiling(Log(10, ANormDen div ANormDenFact));
+
+
     until false;
 
     /* Simplify over the rationals by removing content and apply MinimizeReduce : */
@@ -212,7 +219,6 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         return f, TernaryToBinary(f);
     end if;
 
-    DOF, DOWght := DixmierOhnoInvariants(f : normalize := true);
 
     return f, TernaryToBinary(f);
 
@@ -247,7 +253,6 @@ function XGCDUnique(L)
     return g, C;
 
 end function;
-
 
 function HyperellipticPolynomialFromJointShiodaInvariants(JS : search_point := true, Deterministic := false)
 
@@ -359,6 +364,7 @@ end function;
 
 
 function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
+
     /* Coefficient ring plus deformation: */
     Pa := PolynomialRing(CoefficientRing(b8), 5);
     Pt := PolynomialRing(Pa); t := Pt.1;
@@ -384,36 +390,44 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
     end for;
 
     vprint Reconstruction, 2 : "Linear constraints :", LEQ;
-    II := ideal<Pa | LEQ>;
+    II := Scheme(AffineSpace(Pa), LEQ);
 
-    /* Generic case */
-    if Dimension(II) lt 0 then
+    DimII := Dimension(II);
+    vprint Reconstruction, 2 : "It yields a scheme of dimension", DimII;
+
+    /* Should not happen */
+    if DimII lt 0 then
 	error "[DixmierOhnoToQuartic] Error: there is no B4 compatible with B8 and DO";
     end if;
-    if Dimension(II) eq 0 then
-	V := Variety(II);
-	if #V eq 1 then
-	    a0, a1, a2, a3, a4 := Explode(Random(V));
-            vprint Reconstruction : "Linear relations suffice.";
-	    b4 := Parent(b8)![a0, a1, a2, a3, a4];
-            return b4;
-	end if;
+
+    /* THE generic case */
+    if DimII eq 0 then
+
+	vprint Reconstruction : "Linear relations suffice.";
+
+	V := RationalPoints(II);
+
+	a0, a1, a2, a3, a4 := Explode(Eltseq(Random(V)));
+	b4 := Parent(b8)![a0, a1, a2, a3, a4];
+
+	return b4;
+
     end if;
 
-    /* TODO: Check for correctness of what follows. */
     /* Strange situation, we try to add degree 2 constraints */
-    vprint Reconstruction : "Adding more, non-linear, constraints...";
+    vprint Reconstruction : "Adding more, now quadratic, constraints...";
 
     QuadJointInvsNames := [ "j3a", "j4a", "j4b", "j5c", "j5d", "j6e", "j6f", "j6g" ];
     QuadJointInvsIndices := [ 75, 77, 78, 83, 84, 92, 93, 94 ];
+    QuadJointInvsWeights := [ 3, 4, 4, 5, 5, 6, 6, 6 ];
 
     for i:=1 to #QuadJointInvsNames do
-        inv := JointInvariantFromDixmierOhno(QuadJointInvsNames[i], DO);
+        inv := lambda^(-8*QuadJointInvsWeights[i]) * JointInvariantFromDixmierOhno(QuadJointInvsNames[i], DO);
         COV,_Precomputations := JointCovariant(S8S4Cov, [B4, B8], QuadJointInvsIndices[i] : Precomputations :=_Precomputations);
         Append(~LEQ,Pa!(COV[1])-inv);
     end for;
 
-    /* In case we fail, we try to add more (but non-linear) constraints, which
+    /* Additionally, we try to add more (but non-linear) constraints, which
      * impose that the covariant of the end result is normalized */
     I03,I06,I09,J09,I12,J12,I15,J15,I18,J18,I21,J21,I27 := Explode(DO);
     S := PolynomialRing(CoefficientRing(B4), 2); x := S.1; y := S.2;
@@ -432,41 +446,96 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
 	MonomialCoefficient(Q, Y*Z)
 	];
 
-    II := ideal<Pa | LEQ>;
+    II := Scheme(AffineSpace(Pa), LEQ);
     vprint Reconstruction, 2 : "Ideal in the coefficients:", II;
 
-    if Dimension(II) lt 0 then
+    /* Radical components */
+    PCI := PrimeComponents(II);
+    vprint Reconstruction, 2 : "It yields a scheme with", #PCI, "prime components :";
+
+    /* Let us make a first filter */
+    _PCI := []; idx := 0; for PI in PCI do idx+:=1;
+	DimII := Dimension(PI);
+	vprint Reconstruction, 2 : "    _ Component",  idx, "is of dimension", DimII;
+	if DimII ge 0 then
+	    Append(~_PCI, [* DimII, PI *]);
+	end if;
+    end for; PCI := _PCI;
+
+    if #PCI eq 0 then
 	error "[DixmierOhnoToQuartic] Error: there is no B4 compatible with B8 and DO";
     end if;
-    if Dimension(II) ne 0 then
-	error "[DixmierOhnoToQuartic] Error: our current methods to determine b4 uniquely failed";
+
+    /* Only one radical component, with one point, perfect, we can decide :-) */
+    if #PCI eq 1 and PCI[1, 1] eq 0 and Degree(PCI[1,2]) eq 1 then
+
+	vprint Reconstruction : "Quadratic relations suffice.";
+
+	V := PointsOverSplittingField(PCI[1,2]);
+	return PolynomialRing(Ring(Universe(V)))!Eltseq(Random(V));
+
     end if;
 
-    RD := RadicalDecomposition(II);
-    vprint Reconstruction, 2 : "Ideal(s) in the coefficients:", RD;
+    /* Hum :-/ let us continue our search */
+    vprint Reconstruction, 2 : "\nHum... let us investigate, with constraints of higher degrees, which one of these components is the good one";
 
-    /*
-    if #RD gt 1  then
-	vprint Reconstruction, 2 : "Hum... let us investigate which one of these ideals is the good one", RD;
-	for rd in RD do
-	    GB := Basis(RD[1]);
+    OtherJointInvsNames   := [ "j5f", "j6", "j6a", "j6b", "j6c", "j6i", "j7", "j7a", "j7b", "j7c", "j7d", "j7e", "j7f", "j7g", "j7h", "j7i", "j7j", "j8", "j8a", "j8b", "j8c", "j8d", "j8e", "j8f", "j8g", "j8h", "j8i", "j3a", "j9", "j9a", "j9b", "j9c", "j4c", "j9d", "j5", "j10", "j5a", "j10a"];
+    OtherJointInvsIndices :=  [ 86, 87, 88, 89, 90, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 75, 118, 119, 120, 121, 79, 122, 80, 123, 81, 124 ];
+    OtherJointInvsWeights := [ 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 9, 9, 9, 9, 4, 9, 5, 10, 5, 10];
 
-	    NLEQ := GB;
-	    for i in [ 74 .. 126 ] diff ( { 74, 79, 85, 86, 95, 96 } join { 75, 77, 78, 83, 84, 92, 93, 94 } ) do
-		inv := JointInvariantFromDixmierOhno(QuadJointInvsNames[i], DO);
-		COV,_Precomputations := JointCovariant(S8S4Cov, [B4,B8], QuadJointInvsIndices[i] : Precomputations :=_Precomputations);
-		Append(~LEQ,Pa!(COV[1])-inv);
-		Append(~NLEQ, )
-	    end for;
-	    j4
+    LST := []; idx := 0; for pci in PCI do idx +:= 1;
+
+	LEQ := Equations(pci[2]);
+
+	for i := 1 to #OtherJointInvsNames do
+	    //		"Handling", OtherJointInvsNames[i];
+	    inv := lambda^(-8*OtherJointInvsWeights[i]) * JointInvariantFromDixmierOhno(OtherJointInvsNames[i], DO);
+	    COV,_Precomputations := JointCovariant(S8S4Cov, [B4,B8], OtherJointInvsIndices[i] : Precomputations :=_Precomputations);
+	    Append(~LEQ,Pa!(COV[1])-inv);
+
 	end for;
+
+	/* Radical components */
+	II := Scheme(AffineSpace(Pa), LEQ);
+	_PCI := PrimeComponents(II);
+	vprint Reconstruction, 2 : "Component", idx, "of dim", pci[1], "yields", #_PCI, "prime components";
+
+	if #_PCI eq 0 then continue; end if;
+
+	jdx := 0; for pi in _PCI do jdx+:=1;
+	    Dimpi := Dimension(pi);
+	    vprint Reconstruction, 2 : "    _ Its component",  jdx, "is of dimension", Dimpi;
+
+	    if Dimpi gt 1 then
+		error "[DixmierOhnoToQuartic] Error: there are infinitly many B4 compatible with B8 and DO";
+	    end if;
+
+	    V := PointsOverSplittingField(pi);
+	    vprint Reconstruction, 2 : "        ... and has", #V, "points";
+	    for v in V do
+		b4 := PolynomialRing(Ring(Universe(V)))!Eltseq(v);
+		if not b4 in LST then
+		    Append(~LST, b4);
+		end if;
+	    end for;
+
+
+	end for;
+
+    end for;
+
+    if #LST eq 0 then
+	error "[DixmierOhnoToQuartic] Error: there is no B4 compatible with B8 and DO";
     end if;
-    */
 
-    FQ := quo<Pa | RD[1]>;
+    vprint Reconstruction, 2 : "\nWe finally found", #LST, "possible B4";
+    if #LST gt 1 then
+	vprint Reconstruction, 2 : "Let us return the first one ?!!";
+    end if;
 
-    a0, a1, a2, a3, a4 := Explode(Random(Variety(RD[1], FQ)));
-    return PolynomialRing(FQ)![a0, a1, a2, a3, a4];
+    vprint Reconstruction, 2 : "\n";
+
+    return LST[1];
 
 end function;
 

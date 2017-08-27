@@ -34,44 +34,61 @@ function GL2ToGL3(U);
 end function;
 
 
-function IsomorphismFromB8(b8);
+function IsomorphismFromB8(b8 : RandomOne := false);
 
-L := BaseRing(Parent(b8)); s := L.1;
-g := MinimalPolynomial(s);
-sigma := hom<L -> L | -Coefficient(g,1) - s>;
-test, L := IsGL2GeometricEquivalent(b8, ConjugateForm(sigma, b8), 8 : geometric := false);
-return GL2ToGL3(L[1]);
+    L := BaseRing(Parent(b8)); s := L.1;
+
+    g := MinimalPolynomial(s);
+    sigma := hom<L -> L | -Coefficient(g,1) - s>;
+
+    test, L := IsGL2GeometricEquivalent(b8, ConjugateForm(sigma, b8), 8 : geometric := false);
+
+    if RandomOne then
+	return GL2ToGL3(L[Random([1..#L])]);
+    end if;
+
+    return [* GL2ToGL3(ll) : ll in L *];
 
 end function;
 
 
 function NormalizeCocycle(A);
 
-L := BaseRing(A); s := L.1;
-g := MinimalPolynomial(s);
-sigma := hom<L -> L | -Coefficient(g,1) - s>;
-prod := A * ConjugateMatrix(sigma, A);
+    L := BaseRing(A); s := L.1;
+    g := MinimalPolynomial(s);
+    sigma := hom<L -> L | -Coefficient(g,1) - s>;
+    prod := A * ConjugateMatrix(sigma, A);
 
-lambda := prod[1,1];
-B := (lambda/Determinant(A)) * A;
-return B;
+    "prod is", prod;
+
+    lambda := [c : c in Eltseq(prod) | c ne 0][1];
+    B := (lambda/Determinant(A)) * A;
+
+    return B;
 
 end function;
 
 
 function CoboundaryRandom(A : SmallCoboundary := true, BadPrimesList := []);
 
-    vprintf Reconstruction, 1 : "Looking for a couboundary with Serre's algorithm\n";
+    vprintf Reconstruction, 1 : "Looking for a coboundary with Serre's algorithm\n";
 
     L := BaseRing(A); s := L.1;
     g := MinimalPolynomial(s);
     sigma := hom<L -> L | -Coefficient(g,1) - s>;
 
-    Bound := 2;
+
     ECMLimit := 1000;
-    D := [-Bound..Bound];
+    if IsFinite(L) then
+	D := L;
+    else
+	Bound := 10; D := [-Bound..Bound];
+    end if;
 
     nb := 0; while true do
+
+	// if nb gt 10 then quit; end if;
+
 	TT := Cputime();
 	nb +:= 1;
 	vprintf Reconstruction, 1 : "\nDescent try %o :\n", nb;
@@ -80,67 +97,67 @@ function CoboundaryRandom(A : SmallCoboundary := true, BadPrimesList := []);
 	B := B0 + A * ConjugateMatrix(sigma, B0);
 
 	if Rank(B) eq Rank(A) then
+
 	    if not SmallCoboundary then
-		return B;
+		return B, [];
+	    end if;
+
+	    nm := Norm(Determinant(B));
+	    ret, nm := IsSquare(nm); 		/* nm is a square */
+
+	    num := Abs(Numerator(nm)); den := Abs(Denominator(nm));
+
+	    if #BadPrimesList ne 0 then
+		num := num div &*[ p^Valuation(num, p) : p in BadPrimesList ];
+		den := den div &*[ p^Valuation(den, p) : p in BadPrimesList ];
+	    end if;
+
+	    vprintf Reconstruction, 1 : "Checking coboundary for smallness (%o digits / %o digits)...\n", Ceiling(Log(10, num)), Ceiling(Log(10, den));
+
+	    vprintf Reconstruction, 2 : "den reduced := %o\n", den;
+
+	    Fac_den := Factorization(den
+		: MPQSLimit := 0, ECMLimit := ECMLimit, PollardRhoLimit := 10^4, Bases := 10,  Proof := false
+		);
+
+	    if (FactorizationToInteger(Fac_den) eq den) then
+
+		vprintf Reconstruction, 2 : "den completely factorized, now num := %o;\n", num;
+
+		Fac_num := Factorization(num : MPQSLimit := 0, ECMLimit
+		    := ECMLimit, PollardRhoLimit := 10^4, Bases := 10, Proof := false);
+
+		if (FactorizationToInteger(Fac_num) eq num) then
+		    vprintf Reconstruction, 2 : "This num is also completely factorized\n\n";
+
+		    vprintf Reconstruction, 1 : "So, we found a smooth descent morphism B, let us return it :-)\n";
+
+		    bp := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_den ]);
+		    vprint Reconstruction : "Further primes in coboundary:";
+		    vprint Reconstruction : bp;
+
+		    // print "Cocycle works?";
+		    //print A * ConjugateMatrix(sigma, B) eq B;
+
+		    return B, bp;
+		end if;
+
+		vprintf Reconstruction, 1 :
+		    "%o digits / %o digits remained... (%o s)\n\n",
+		    Ceiling(Log(10, num div FactorizationToInteger(Fac_num))),
+		    Ceiling(Log(10, den div
+		    FactorizationToInteger(Fac_den))),
+		    Cputime(TT);
+
 	    else
 
-		nm := Norm(Determinant(B));
-		ret, nm := IsSquare(nm); 		/* nm is a square */
-
-		num := Abs(Numerator(nm)); den := Abs(Denominator(nm));
-
-		if #BadPrimesList ne 0 then
-		    num := num div &*[ p^Valuation(num, p) : p in BadPrimesList ];
-		    den := den div &*[ p^Valuation(den, p) : p in BadPrimesList ];
-		end if;
-
-		vprintf Reconstruction, 1 : "Checking coboundary for smallness (%o digits / %o digits)...\n", Ceiling(Log(10, num)), Ceiling(Log(10, den));
-
-		vprintf Reconstruction, 2 : "den reduced := %o\n", den;
-
-		Fac_den := Factorization(den
-		    : MPQSLimit := 0, ECMLimit := ECMLimit, PollardRhoLimit := 10^4, Bases := 10,  Proof := false
-		    );
-
-		if (FactorizationToInteger(Fac_den) eq den) then
-
-		    vprintf Reconstruction, 2 : "den completely factorized, now num := %o;\n", num;
-
-		    Fac_num := Factorization(num : MPQSLimit := 0, ECMLimit
-			:= ECMLimit, PollardRhoLimit := 10^4, Bases := 10, Proof := false);
-
-		    if (FactorizationToInteger(Fac_num) eq num) then
-			vprintf Reconstruction, 2 : "This num is also completely factorized\n\n";
-
-			vprintf Reconstruction, 1 : "So, we found a smooth descent morphism B, let us return it :-)\n";
-
-			bp := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_den ]);
-			vprint Reconstruction : "Further primes in coboundary:";
-			vprint Reconstruction : bp;
-
-			// print "Cocycle works?";
-			//print A * ConjugateMatrix(sigma, B) eq B;
-
-			return B, bp;
-		    end if;
-
-		    vprintf Reconstruction, 1 :
-			"%o digits / %o digits remained... (%o s)\n\n",
-			Ceiling(Log(10, num div FactorizationToInteger(Fac_num))),
-			Ceiling(Log(10, den div
-			FactorizationToInteger(Fac_den))),
-			Cputime(TT);
-
-		else
-
-		    vprintf Reconstruction, 1 :
-			"? / %o digits remained... (%o s)\n\n",
-			Ceiling(Log(10, den div FactorizationToInteger(Fac_den))),
-			Cputime(TT);
-
-		end if;
+		vprintf Reconstruction, 1 :
+		    "? / %o digits remained... (%o s)\n\n",
+		    Ceiling(Log(10, den div FactorizationToInteger(Fac_den))),
+		    Cputime(TT);
 
 	    end if;
+
 	end if;
 
     end while;
@@ -229,15 +246,25 @@ function CoboundaryLinear(A : BadPrimesList := []);
 
 end function;
 
-
-
-function Descent(f, b8 : Isomorphism := false, RandomCoboundary := false, SmallCoboundary := true, BadPrimesList := []);
+function Descent(f, b8 : Isomorphism := false, RandomCoboundary := true, SmallCoboundary := false, BadPrimesList := []);
 
     if Type(Isomorphism) eq BoolElt then
-	A := NormalizeCocycle(IsomorphismFromB8(b8));
-    else
-	A := Isomorphism;
+	F := BaseRing(MinimalPolynomial(BaseRing(Parent(f)).1));
+
+	for A in IsomorphismFromB8(b8) do
+	    f0 := $$(f, b8 : Isomorphism := NormalizeCocycle(A),
+		RandomCoboundary := RandomCoboundary, SmallCoboundary :=
+		SmallCoboundary, BadPrimesList := BadPrimesList);
+
+	    if &and( [ coeff in F : coeff in Coefficients(f0) ]) then break; end if;
+	end for;
+
+	"...done";
+	return f0;
+
     end if;
+
+    A := Isomorphism;
 
     if not RandomCoboundary then
 	B, bp := CoboundaryLinear(A);

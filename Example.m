@@ -30,7 +30,7 @@ SetVerbose("PlaneQuartic", 1);
 SetVerbose("ClusterReduction", 1);
 
 /* Start from a random ternary quartic */
-F := Rationals();  B := 2^20; Domain := [-B..B];
+F := Rationals();  B := 2^10; Domain := [-B..B];
 //F := GF(NextPrime(10^5));  Domain := F;
 R<x1, x2, x3> := PolynomialRing(F, 3);
 repeat
@@ -44,6 +44,9 @@ print "Start from f =", f;
 print "";
 print "Its invariants are", DOf;
 DOf_norm := WPSNormalize(DOWght, DOf);
+/* TODO: Introducing a single incorrect element still gives output */
+//DOf_norm[2] := 10;
+//print DOf_norm;
 
 /* Construct another quartic with equivalent invariants */
 g, aut, twists := TernaryQuarticFromDixmierOhnoInvariants(DOf);
@@ -62,5 +65,6 @@ print "";
 print "Test for equality of invariants:", DOf eq DOg;
 print "";
 print "Test for equality of normalized invariants:", DOf_norm eq DOg_norm;
+print DOg_norm;
 
 exit;

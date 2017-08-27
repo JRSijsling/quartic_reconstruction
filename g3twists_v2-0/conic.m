@@ -165,7 +165,7 @@ function FindPointOnConic(L : RationalPoint := true, RandomLine := true, Legendr
 	then
 	HasRatPoint, Pt := HasRationalPoint(C);
 	if HasRatPoint then
-            vprintf G3Twists, 1 : "Conic has a rational point\n";
+	    vprintf G3Twists, 1 : "Conic has a rational point\n";
 	    return Parametrization(C, Place(Pt), Curve(ProjectiveSpace(K, 1)));
 	end if;
 	vprintf G3Twists, 1 : "Conic has no rational point\n";
@@ -264,16 +264,16 @@ function Genus3ConicAndQuartic(JI : models := true, RationalModel := true, Deter
 	    vprintf G3Twists, 2 :  "  R = %o\n", R;
 
 	    /* Let us first remove the content of C and Q */
-	    ct := GCD([Denominator(c) : c in Coefficients(C)]) /
+	    ct := LCM([Denominator(c) : c in Coefficients(C)]) /
 		  GCD([Numerator(c) : c in Coefficients(C)]);
 	    C *:= ct;
-	    ct := GCD([Denominator(c) : c in Coefficients(Q)]) /
+	    ct := LCM([Denominator(c) : c in Coefficients(Q)]) /
 		GCD([Numerator(c) : c in Coefficients(Q)]);
 	    Q *:= ct;
 
-            vprintf G3Twists, 2 :
-                "Factorization of conic discriminant before reduction: %o\n",
-                Factorization(Integers() ! Discriminant(Conic(ProjectiveSpace(Parent(C)), C)));
+            //vprintf G3Twists, 2 :
+            //    "Factorization of conic discriminant before reduction: %o\n",
+            //    Factorization(Integers() ! Discriminant(Conic(ProjectiveSpace(Parent(C)), C)));
 
             vprintf G3Twists, 2 : "Minimal model step...\n";
 	    Cphi, phi := MinimalModel(Conic(ProjectiveSpace(Parent(C)), C));
