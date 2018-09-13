@@ -408,7 +408,11 @@ intrinsic WPSMinimize(Wght::SeqEnum, V::SeqEnum) -> SeqEnum
 
     primes := { fac[1] : fac in Factorization(gcd_den) cat Factorization(gcd_num) };
     
-    lambda := &*[ p^(Round(Maximum([ -Valuation(V[k], p)/Wght[k] : k in [1..#V] ]))) : p in primes ];
+    if #primes eq 0 then
+        lambda := 1;
+    else
+        lambda := &*[ p^(Round(Maximum([ -Valuation(V[k], p)/Wght[k] : k in [1..#V] ]))) : p in primes ];
+    end if;
     
     return WPSMultiply(Wght, V, lambda), lambda;
     

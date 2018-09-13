@@ -140,7 +140,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
 
 	vprint Reconstruction : "Final inversion...";
 	f := BinaryToTernary([b8h, b4h, b0h]);
-	"f is", f;
+	vprint Reconstruction : "f is", f;
 
 	isDescended := &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ b8h, b4h, b0h ] ] );
 	if not descent or isDescended then
