@@ -14,8 +14,8 @@ AttachSpec("[PATH]/g3twists\_v2-0/spec");
 
 to the user's .magmarc file, which can typically be found in the home directory). Here [PATH] is to be replaced by the directory of the cloned and downloaded repository, so that one could for example have
 
-AttachSpec("~/Programs/Reconstruction/package/spec");  
-AttachSpec("~/Programs/Reconstruction/g3twists\_v2-0/spec");
+AttachSpec("\~/Programs/Reconstruction/package/spec");  
+AttachSpec("\~/Programs/Reconstruction/g3twists\_v2-0/spec");
 
 A bug fix
 ---------
