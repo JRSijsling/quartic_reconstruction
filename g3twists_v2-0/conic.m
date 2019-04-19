@@ -124,15 +124,19 @@ function FindPointOnConic(L : RationalPoint := true)
 	    if S[3] eq 0 then
 		if s3 ne 0 then return S[1]/s3, S[2]/s3; end if;
 		// There is only one tangent line...
-		if S[1] eq 0 then
-		    pol := Evaluate(L, [UP | S[1]+u,S[2],u]); // pol = c*u*(u-t)
-		else
-		    pol := Evaluate(L, [UP | S[1],S[2]+u,u]); // pol = c*u*(u-t)
-		end if;
-		s3 := -Coefficient(pol, 1)/Coefficient(pol, 2);
-		error if s3 eq 0, "Error in FindPointOnConic";
-		assert Evaluate(L, [S[1],S[2],s3]) eq 0;
-		return S[1]/s3, S[2]/s3;
+                if S[1] eq 0 then
+                    pol := Evaluate(L, [UP | S[1]+u,S[2],u]); // pol = c*u*(u-t)
+                    s3 := -Coefficient(pol, 1)/Coefficient(pol, 2);
+                    error if s3 eq 0, "Error in FindPointOnConic";
+                    assert Evaluate(L, [S[1] + s3,S[2],s3]) eq 0;
+                    return (S[1] + s3)/s3, S[2]/s3;
+                else
+                    pol := Evaluate(L, [UP | S[1],S[2]+u,u]); // pol = c*u*(u-t)
+                    s3 := -Coefficient(pol, 1)/Coefficient(pol, 2);
+                    error if s3 eq 0, "Error in FindPointOnConic";
+                    assert Evaluate(L, [S[1],S[2] + s3,s3]) eq 0;
+                    return S[1], (S[2] + s3)/s3;
+                end if;
 	    else
 		return S[1]/S[3], S[2]/S[3];
 	    end if;
@@ -141,7 +145,6 @@ function FindPointOnConic(L : RationalPoint := true)
 	error "Algorithm not available for this type of field.\n";
     end if;
 end function;
-
 */
 
 function FindPointOnConic(L : RationalPoint := true, RandomLine := true, Legendre := false, B := 100)
@@ -395,9 +398,7 @@ function Genus3ConicAndQuartic(JI : models := true, RationalModel := true, Deter
 
 */
 
-	phi := FindPointOnConic(C :
-	    RationalPoint := RationalModel,
-	    RandomLine := not Deterministic);
+	phi := FindPointOnConic(C : RationalPoint := RationalModel, RandomLine := not Deterministic);
 
 	f := Evaluate(Q, DefiningPolynomials(phi));
 

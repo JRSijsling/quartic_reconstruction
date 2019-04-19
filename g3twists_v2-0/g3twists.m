@@ -999,7 +999,7 @@ function G3ModelsInCharFF_G8_5(JI : geometric := false)
 end function;
 
 
-function G3Models(JI: geometric := false, models := true, RationalModel :=  false, Deterministic := false)
+function G3Models(JI: geometric := false, models := true, RationalModel := true, Deterministic := false)
 
     FF := Universe(JI);
     p := Characteristic(FF);
@@ -2125,7 +2125,7 @@ intrinsic DiscriminantFromShiodaInvariants(JI::SeqEnum) -> BoolElt
 
 end intrinsic;
 
-intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := false, Deterministic := false) -> CrvHyp, GrpPerm
+intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := true, Deterministic := false) -> CrvHyp, GrpPerm
     {Compute a genus 3 hyperelliptic curve and its automorphism group from given
     Shioda invariants if they are non-singular, "[], <>" is returned
     otherwise. For singular Shioda invariants, see the function
@@ -2187,7 +2187,7 @@ intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := f
     return HyperellipticCurve(twists[1]), aut;
 end intrinsic;
 
-intrinsic HyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum : RationalModel := false, Deterministic := false) -> SeqEnum, GrpPerm
+intrinsic HyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum : RationalModel := true, Deterministic := false) -> SeqEnum, GrpPerm
     {Compute from given Shioda invariants a list [f(x)], or [h(x),f(x)]
     depending on the characteristic of the based field, with f(x) of degree 7
     or 8.
@@ -2238,7 +2238,7 @@ intrinsic HyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum : RationalMod
     return twists, aut;
 end intrinsic;
 
-intrinsic HyperellipticPolynomialFromShiodaInvariants(JI::SeqEnum : RationalModel := false, Deterministic := false) -> RngUPolElt, GrpPerm
+intrinsic HyperellipticPolynomialFromShiodaInvariants(JI::SeqEnum : RationalModel := true, Deterministic := false) -> RngUPolElt, GrpPerm
     {Compute from given Shioda invariants a univariate polynomial f(x) with f of degree 8.
     The characteristic of the field must not be even
     (see HyperellipticPolynomialsFromShiodaInvariants for that case).
@@ -2260,7 +2260,7 @@ end intrinsic;
   * Twists
   *
   ********************************************************************/
-intrinsic TwistedHyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum[FldFinElt] : RationalModel := false, Deterministic := false) -> SeqEnum[CrvHyp], GrpPerm
+intrinsic TwistedHyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum[FldFinElt] : RationalModel := true, Deterministic := false) -> SeqEnum[CrvHyp], GrpPerm
     {Compute twisted  hyperelliptic polynomials and their automorphism groups from
     Shioda invariants.}
 

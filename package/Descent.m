@@ -26,7 +26,7 @@
 
 /* TODO: We restrict to generic case for now */
 
-import "TernaryForms.m": ConjugateForm, ConjugateMatrix, TransformForm;
+import "TernaryForms.m": ConjugateForm, ConjugateMatrix;
 
 function GL2ToGL3(U);
     a,b,c,d := Explode(U);
@@ -58,8 +58,6 @@ function NormalizeCocycle(A);
     g := MinimalPolynomial(s);
     sigma := hom<L -> L | -Coefficient(g,1) - s>;
     prod := A * ConjugateMatrix(sigma, A);
-
-    "prod is", prod;
 
     lambda := [c : c in Eltseq(prod) | c ne 0][1];
     B := (lambda/Determinant(A)) * A;

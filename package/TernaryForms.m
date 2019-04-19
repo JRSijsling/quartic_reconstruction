@@ -23,14 +23,15 @@
 
 /* Current transformation algorithm: */
 
-function TransformForm(f, T : co := true, contra := false)
+intrinsic TransformForm(f::RngMPolElt, T::AlgMatElt : co := true, contra := false) -> .
+{Transforms the form f by the matrix T.}
     R := Parent(f);
     vars := Matrix([ [ mon ] : mon in MonomialsOfDegree(R, 1) ]);
     if (not co) or contra then
         return Evaluate(f, Eltseq(ChangeRing(Transpose(T)^(-1), R) * vars));
     end if;
     return Evaluate(f, Eltseq(ChangeRing(T, R) * vars));
-end function;
+end intrinsic;
 
 /* From form to polynomials and back: */
 

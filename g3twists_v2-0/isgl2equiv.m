@@ -143,6 +143,14 @@ function MyRandom(FF : BD := 7)
     return Random(FF);
 end function;
 
+function GeometricRootsNew(f);
+    R := Parent(f); K := BaseRing(R);
+    S := PolynomialRing(K, 1);
+    h := hom< R -> S | S.1 >;
+    A := AffineSpace(S);
+    return [ pt[1] : pt in PointsOverSplittingField(Scheme(A, h(f))) ];
+end function;
+
 procedure GeometricRoots(f, ~LST : geometric := true)
 
     Q := CoefficientRing(f); X := Parent(f).1;
@@ -236,8 +244,8 @@ function IsGL2GeometricEquivalentAlphaEq0(_f, _F, d : geometric := true)
 	return false, [**];
     end if;
 
-
     GF := [* *]; GeometricRoots(PG, ~GF : geometric := geometric);
+    //GF := GeometricRootsNew(PG);
 
     ret := false; LST := [**];
     for bet in GF do
@@ -258,10 +266,12 @@ function IsGL2GeometricEquivalentAlphaEq0(_f, _F, d : geometric := true)
 	    LF := RM[1];
 
 	    FF := Q;
+            /*
 	    if Parent(LF[1]) ne FF then
 		FF := sub< Parent(LF[1]) | LF>;
 		LF := [FF!l : l in LF];
 	    end if;
+            */
 	    if Index(LST, LF) eq 0 then
 	        vprintf IsGL2Equiv, 1 :  "%o\n", LF;
 		Append(~LST, LF);
@@ -385,6 +395,7 @@ vprintf IsGL2Equiv, 1 : "EQ2 is of degree %o\n", Degree(EQ2);
     end if;
 
     GF := [* *]; GeometricRoots(PG, ~GF : geometric := geometric);
+    //GF := GeometricRootsNew(PG);
 
     LST := [**];
     for m21 in GF do
@@ -485,10 +496,12 @@ vprintf IsGL2Equiv, 1 : "EQ2 is of degree %o\n", Degree(EQ2);
 
 	    if #RM ne 0 then
 
+               /*
 	       if Parent(LF[1]) ne FF then
 	          FF := sub< Parent(LF[1]) | LF>;
 		  LF := [FF!l : l in LF];
 	       end if;
+               */
 	       if Index(LST, LF) eq 0 then
 	          vprintf IsGL2Equiv, 1 : "%o\n", LF;
 		  Append(~LST, LF);
@@ -544,7 +557,7 @@ intrinsic IsGL2GeometricEquivalent(_f::RngUPolElt, _F::RngUPolElt, deg::RngIntEl
     ret := true; MF := [**];
 
     /* Covariant reduction, when possible */
-    p := Characteristic(Q) eq 0 select 10^1000 else Characteristic(Q);
+    p := Characteristic(Q) eq 0 select Infinity() else Characteristic(Q);
 
     if Degree(_f) gt 4 and Degree(_f) lt p and
        Degree(_F) gt 4 and Degree(_F) lt p then
