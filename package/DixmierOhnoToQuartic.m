@@ -699,6 +699,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
     end if;
 
     if minimize then
+        //twists := [ NormalizeGenericQuartic(twist) : twist in twists ];
         twists := [ MinimizeReducePlaneQuartic(twist) : twist in twists ];
     end if;
     return twists[1], aut, twists;
