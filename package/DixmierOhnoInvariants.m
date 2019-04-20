@@ -68,9 +68,9 @@ end function;
 function PowerDerivative(F,exp)
     DF := F;
     for i in [1..#exp] do
-	if exp[i] ne 0 then
-	    DF := Derivative(DF,exp[i],i); // k = exp[i]-th derivative wrt i
-	end if;
+        if exp[i] ne 0 then
+            DF := Derivative(DF,exp[i],i); // k = exp[i]-th derivative wrt i
+        end if;
     end for;
     return DF;
 end function;
@@ -81,7 +81,7 @@ function DifferentialOperation(F,G)
     cffs := Coefficients(F);
     DG := Parent(G)!0;
     for i in [1..#cffs] do
-	DG +:= cffs[i]*PowerDerivative(G,Exponents(mons[i]));
+        DG +:= cffs[i]*PowerDerivative(G,Exponents(mons[i]));
     end for;
     return DG;
 end function;
@@ -104,14 +104,14 @@ function JOperation22(F,G)
     A := MatrixAlgebra(K,3)!0;
     B := MatrixAlgebra(K,3)!0;
     for i in [1..3] do
-	A[i,i] := MonomialCoefficient(F,P.i^2);
-	B[i,i] := MonomialCoefficient(G,P.i^2);
-	for j in [i+1..3] do
-	    A[i,j] := MonomialCoefficient(F,P.i*P.j)/2;
-	    A[j,i] := A[i,j];
-	    B[i,j] := MonomialCoefficient(G,P.i*P.j)/2;
-	    B[j,i] := B[i,j];
-	end for;
+        A[i,i] := MonomialCoefficient(F,P.i^2);
+        B[i,i] := MonomialCoefficient(G,P.i^2);
+        for j in [i+1..3] do
+            A[i,j] := MonomialCoefficient(F,P.i*P.j)/2;
+            A[j,i] := A[i,j];
+            B[i,j] := MonomialCoefficient(G,P.i*P.j)/2;
+            B[j,i] := B[i,j];
+        end for;
     end for;
     Astar := Eltseq(Adjoint(A));
     Bstar := Eltseq(Adjoint(B));
@@ -125,11 +125,11 @@ function JOperation30(F)
     X,Y,Z := Explode([ P.i : i in [1..3] ]);
     A := MatrixAlgebra(K,3)!0;
     for i in [1..3] do
-	A[i,i] := MonomialCoefficient(F,P.i^2);
-	for j in [i+1..3] do
-	    A[i,j] := MonomialCoefficient(F,P.i*P.j)/2;
-	    A[j,i] := A[i,j];
-	end for;
+        A[i,i] := MonomialCoefficient(F,P.i^2);
+        for j in [i+1..3] do
+            A[i,j] := MonomialCoefficient(F,P.i*P.j)/2;
+            A[j,i] := A[i,j];
+        end for;
     end for;
     return K!Determinant(A);
 end function;
@@ -144,11 +144,11 @@ function CovariantHessian(Phi)
     DPhi_i := [ Derivative(Phi,i) : i in [1..3] ];
     DPhi_ij := MatrixAlgebra(Parent(Phi),3)!0;
     for i in [1..3] do
-	DPhi_ij[i,i] := Derivative(DPhi_i[i],i);
-	for j in [i+1..3] do
-	    DPhi_ij[i,j] := Derivative(DPhi_i[i],j);
-	    DPhi_ij[j,i] := DPhi_ij[i,j];
-	end for;
+        DPhi_ij[i,i] := Derivative(DPhi_i[i],i);
+        for j in [i+1..3] do
+            DPhi_ij[i,j] := Derivative(DPhi_i[i],j);
+            DPhi_ij[j,i] := DPhi_ij[i,j];
+        end for;
     end for;
     return Determinant(DPhi_ij);
 end function;
@@ -358,13 +358,13 @@ function QuarticDiscriminant(Phi)
     CLASSICAL := true;
 
     if CLASSICAL then
-	C1 := (1/4)*Derivative(Phi,X);
-	C2 := (1/4)*Derivative(Phi,Y);
-	C3 := (1/4)*Derivative(Phi,Z);
+        C1 := (1/4)*Derivative(Phi,X);
+        C2 := (1/4)*Derivative(Phi,Y);
+        C3 := (1/4)*Derivative(Phi,Z);
     else
-	C1 := Derivative(Phi,X);
-	C2 := Derivative(Phi,Y);
-	C3 := Derivative(Phi,Z);
+        C1 := Derivative(Phi,X);
+        C2 := Derivative(Phi,Y);
+        C3 := Derivative(Phi,Z);
     end if;
 
     C1X2 := X^2*C1;
@@ -387,53 +387,53 @@ function QuarticDiscriminant(Phi)
     C3XY := X*Y*C3;
 
     if CLASSICAL then
-	He := (1/1728)*CovariantHessian(Phi);
+        He := (1/1728)*CovariantHessian(Phi);
     else
-	He := (1/54)*CovariantHessian(Phi);
+        He := (1/54)*CovariantHessian(Phi);
     end if;
 
     if CLASSICAL then
-	DHe1 := (1/2)*Derivative(He,X);
-	DHe2 := (1/2)*Derivative(He,Y);
-	DHe3 := (1/2)*Derivative(He,Z);
+        DHe1 := (1/2)*Derivative(He,X);
+        DHe2 := (1/2)*Derivative(He,Y);
+        DHe3 := (1/2)*Derivative(He,Z);
     else
-	DHe1 := Derivative(He,X);
-	DHe2 := Derivative(He,Y);
-	DHe3 := Derivative(He,Z);
+        DHe1 := Derivative(He,X);
+        DHe2 := Derivative(He,Y);
+        DHe3 := Derivative(He,Z);
     end if;
 
     Eqq := [
-	DHe1,DHe2,DHe3,
-	C1X2,C2X2,C3X2,
-	C1Y2,C2Y2,C3Y2,
-	C1Z2,C2Z2,C3Z2,
-	C1YZ,C2YZ,C3YZ,
-	C1ZX,C2ZX,C3ZX,
-	C1XY,C2XY,C3XY];
+        DHe1,DHe2,DHe3,
+        C1X2,C2X2,C3X2,
+        C1Y2,C2Y2,C3Y2,
+        C1Z2,C2Z2,C3Z2,
+        C1YZ,C2YZ,C3YZ,
+        C1ZX,C2ZX,C3ZX,
+        C1XY,C2XY,C3XY];
 
     L := [
-	X^5,
-	X^4*Y,
-	X^4*Z,
-	X^3*Y^2,
-	X^3*Y*Z,
-	X^3*Z^2,
-	X^2*Y^3,
-	X^2*Y^2*Z,
-	X^2*Y*Z^2,
-	X^2*Z^3,
-	X*Y^4,
-	X*Y^3*Z,
-	X*Y^2*Z^2,
-	X*Y*Z^3,
-	X*Z^4,
-	Y^5,
-	Y^4*Z,
-	Y^3*Z^2,
-	Y^2*Z^3,
-	Y*Z^4,
-	Z^5
-	];
+        X^5,
+        X^4*Y,
+        X^4*Z,
+        X^3*Y^2,
+        X^3*Y*Z,
+        X^3*Z^2,
+        X^2*Y^3,
+        X^2*Y^2*Z,
+        X^2*Y*Z^2,
+        X^2*Z^3,
+        X*Y^4,
+        X*Y^3*Z,
+        X*Y^2*Z^2,
+        X*Y*Z^3,
+        X*Z^4,
+        Y^5,
+        Y^4*Z,
+        Y^3*Z^2,
+        Y^2*Z^3,
+        Y*Z^4,
+        Z^5
+        ];
     R27 := Matrix(K,[ [MonomialCoefficient(Eqql,Ll): Ll in L]: Eqql in Eqq ]);
     return Determinant(R27);
 end function;
@@ -443,11 +443,11 @@ function DixmierInvariant(Phi,i :IntegralNormalization := false)
     P := Parent(Phi);
     K := BaseRing(P);
     if i eq 27 then
-	I27 := QuarticDiscriminant(Phi);
-	if IntegralNormalization then
-	    I27 *:= 1099511627776;
-	end if;
-	return I27;
+        I27 := QuarticDiscriminant(Phi);
+        if IntegralNormalization then
+            I27 *:= 1099511627776;
+        end if;
+        return I27;
     end if;
     X := P.1; Y := P.2; Z := P.3;
 
@@ -468,31 +468,31 @@ function DixmierInvariant(Phi,i :IntegralNormalization := false)
     p0 := MonomialCoefficient(Phi,Z^4);
 
     if i eq 3 then
-	I03 := a0*e0*p0
-	    + 3*(a0*l0^2+e0*j0^2+p0*c0^2)
-	    + 4*(b0*i0*m0+f0*d0*n0)
-	    - 4*(a0*i0*n0+e0*f0*m0+p0*b0*d0)
-	    + 6*c0*j0*l0
-	    + 12*(c0*k0^2+j0*h0^2+l0*g0^2)
-	    - 12*g0*h0*k0
-	    - 12*(b0*k0*l0+f0*h0*l0+d0*k0*j0+i0*g0*j0+m0*h0*c0+n0*g0*c0)
-	    + 12*(g0*d0*m0+h0*n0*b0+k0*f0*i0);
-	if IntegralNormalization then
-	    I03 *:= 144;
-	end if;
-	return I03;
+        I03 := a0*e0*p0
+            + 3*(a0*l0^2+e0*j0^2+p0*c0^2)
+            + 4*(b0*i0*m0+f0*d0*n0)
+            - 4*(a0*i0*n0+e0*f0*m0+p0*b0*d0)
+            + 6*c0*j0*l0
+            + 12*(c0*k0^2+j0*h0^2+l0*g0^2)
+            - 12*g0*h0*k0
+            - 12*(b0*k0*l0+f0*h0*l0+d0*k0*j0+i0*g0*j0+m0*h0*c0+n0*g0*c0)
+            + 12*(g0*d0*m0+h0*n0*b0+k0*f0*i0);
+        if IntegralNormalization then
+            I03 *:= 144;
+        end if;
+        return I03;
     elif i eq 6 then
-	I06 := Determinant(M) where M :=Matrix(6,6, [
-	    a0,c0,j0,g0,f0,b0,
-	    c0,e0,l0,i0,h0,d0,
-	    j0,l0,p0,n0,m0,k0,
-	    g0,i0,n0,l0,k0,h0,
-	    f0,h0,m0,k0,j0,g0,
-	    b0,d0,k0,h0,g0,c0]);
-	if IntegralNormalization then
-	    I06 *:= 2985984;
-	end if;
-	return I06;
+        I06 := Determinant(M) where M :=Matrix(6,6, [
+            a0,c0,j0,g0,f0,b0,
+            c0,e0,l0,i0,h0,d0,
+            j0,l0,p0,n0,m0,k0,
+            g0,i0,n0,l0,k0,h0,
+            f0,h0,m0,k0,j0,g0,
+            b0,d0,k0,h0,g0,c0]);
+        if IntegralNormalization then
+            I06 *:= 2985984;
+        end if;
+        return I06;
     end if;
 
     PXYZ := Parent(Phi);
@@ -534,33 +534,33 @@ function DixmierInvariant(Phi,i :IntegralNormalization := false)
     F2 := MonomialCoefficient(Rho,Zo^2);
 
     if i eq 9 then
-	I09 := A1*A2+2*B1*B2+C1*C2+2*D1*D2+2*E1*E2+F1*F2;
-	if IntegralNormalization then
-	    I09 *:= 26873856;
-	end if;
-	return K!I09;
+        I09 := A1*A2+2*B1*B2+C1*C2+2*D1*D2+2*E1*E2+F1*F2;
+        if IntegralNormalization then
+            I09 *:= 26873856;
+        end if;
+        return K!I09;
     elif i eq 12 then
-	I12 := Determinant(Matrix(3,3,[A2,B2,D2,B2,C2,E2,D2,E2,F2]));
-	if IntegralNormalization then
-	    I12 *:= 34828517376;
-	end if;
-	return K!I12;
+        I12 := Determinant(Matrix(3,3,[A2,B2,D2,B2,C2,E2,D2,E2,F2]));
+        if IntegralNormalization then
+            I12 *:= 34828517376;
+        end if;
+        return K!I12;
     elif i eq 15 then
-	I15 := Determinant(Matrix(3,3,[A1,B1,D1,B1,C1,E1,D1,E1,F1]));
-	if IntegralNormalization then
-	    I15 *:= 120367356051456;
-	end if;
-//	return K!MonomialCoefficient(I15,PUVW!1);
-	return K!I15;
+        I15 := Determinant(Matrix(3,3,[A1,B1,D1,B1,C1,E1,D1,E1,F1]));
+        if IntegralNormalization then
+            I15 *:= 120367356051456;
+        end if;
+//      return K!MonomialCoefficient(I15,PUVW!1);
+        return K!I15;
     elif i eq 18 then
-	I18 := (E1^2-C1*F1)*(E2^2-C2*F2)+2*(B1*F1-D1*E1)*(B2*F2-D2*E2)
-	    + (D1^2-A1*F1)*(D2^2-A2*F2) + 2*(C1*D1-B1*E1)*(C2*D2-B2*E2)
-	    + 2*(A1*E1-B1*D1)*(A2*E2-B2*D2)+(B1^2-A1*C1)*(B2^2-A2*C2);
-	if IntegralNormalization then
-	    I18 *:= 17332899271409664;
-	end if;
-//	return K!MonomialCoefficient(I18,PUVW!1);
-	return K!I18;
+        I18 := (E1^2-C1*F1)*(E2^2-C2*F2)+2*(B1*F1-D1*E1)*(B2*F2-D2*E2)
+            + (D1^2-A1*F1)*(D2^2-A2*F2) + 2*(C1*D1-B1*E1)*(C2*D2-B2*E2)
+            + 2*(A1*E1-B1*D1)*(A2*E2-B2*D2)+(B1^2-A1*C1)*(B2^2-A2*C2);
+        if IntegralNormalization then
+            I18 *:= 17332899271409664;
+        end if;
+//      return K!MonomialCoefficient(I18,PUVW!1);
+        return K!I18;
     end if;
 end function;
 
@@ -579,21 +579,21 @@ intrinsic DixmierOhnoInvariants(f::RngMPolElt : normalize := false) -> SeqEnum, 
     P := Parent(f);
 
     require
-	Rank(P) in {2, 3} and
-	((Rank(P) eq 3 and {Degree(e) : e in Monomials(f)} eq {4}) or
-	(Rank(P) eq 2 and Degree(f) le 4))
-	:
-	"Input must be a ternary homogeneous polynomial of degree  4 or a binary polynomial of degree <= 4";
+        Rank(P) in {2, 3} and
+        ((Rank(P) eq 3 and {Degree(e) : e in Monomials(f)} eq {4}) or
+        (Rank(P) eq 2 and Degree(f) le 4))
+        :
+        "Input must be a ternary homogeneous polynomial of degree  4 or a binary polynomial of degree <= 4";
 
     require
-	(Characteristic(P) eq 0) or (Characteristic(P) gt 7)
-	:
-	"Characteristic must be 0 or > 7";
+        (Characteristic(P) eq 0) or (Characteristic(P) gt 7)
+        :
+        "Characteristic must be 0 or > 7";
 
     Phi := f;
     if Rank(P) eq 2 then
-	Phi := Basis(Homogenization(ideal<Parent(f)|f>))[1];
-	P := Parent(Phi);
+        Phi := Basis(Homogenization(ideal<Parent(f)|f>))[1];
+        P := Parent(Phi);
     end if;
 
     Sigma, Psi := ContravariantSigmaAndPsi(Phi);

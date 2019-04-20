@@ -64,14 +64,14 @@ function QuadricNormalizer(Q)
     delta := (a*d - 1/4*b^2);
     // Do we have any trouble ?
     if not ( IsUnit(a) and IsUnit(delta) ) then
-	return Matrix([ [0, 0, 0], [0, 0, 0],  [0, 0, 0] ]);
+        return Matrix([ [0, 0, 0], [0, 0, 0],  [0, 0, 0] ]);
     end if;
     N := (a*e - 1/2*b*c);
     Delta := (a*d*f - 1/4*a*e^2 - 1/4*b^2*f + 1/4*b*c*e - 1/4*c^2*d);
     test, r := IsSquare(-a*Delta);
     if not test then
         P := PolynomialRing(R); u := P.1;
-	r := FieldOfFractions(quo<P | u^2 + a*Delta>).1;
+        r := FieldOfFractions(quo<P | u^2 + a*Delta>).1;
     end if;
     T1 := Matrix([[1, b/(2*a), 0], [0, 1, 0], [0, c/(2*a), 1]]);
     T2 := Matrix([[1, 0, 0], [0, 1, 0], [N/(2*delta), 0, 1]]);

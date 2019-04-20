@@ -36,9 +36,9 @@ import "JointCovariants.dat": S8S4Cov;
 
 /* A covariant (U, V)^level */
 COV_t :=  recformat<
-    U, 			// Covariants in U
-    V, 			// Covariants in V
-    level,		// Transvectant order
+    U,                  // Covariants in U
+    V,                  // Covariants in V
+    level,              // Transvectant order
     degree,             // Covariant degree
     order               // Covariant order
     >;
@@ -55,9 +55,9 @@ function UnivariateTransvectant(F, G, r)
 
     h := Parent(Q)!0;
     for k := 0 to r do
-	h +:= (-1)^k
-	    * Binomial(m-k,r-k)  * Derivative(Q, r-k)
-	    * Binomial(n-r+k, k) * Derivative(R, k);
+        h +:= (-1)^k
+            * Binomial(m-k,r-k)  * Derivative(Q, r-k)
+            * Binomial(n-r+k, k) * Derivative(R, k);
     end for;
 
     coef := Factorial(m-r)*Factorial(n-r)/Factorial(m)/Factorial(n);
@@ -78,7 +78,7 @@ function JointCovariant(FdCov, forms, idx : Precomputations := [])
     //end if;
 
     if IsDefined(Precomputations, 1+idx) then
-	return Precomputations[1+idx], Precomputations;
+        return Precomputations[1+idx], Precomputations;
     end if;
 
     _Precomputations := Precomputations;
@@ -86,33 +86,33 @@ function JointCovariant(FdCov, forms, idx : Precomputations := [])
 
     /* Is Cov equal to a product of the initial forms ? */
     if  (Cov`U meet {* i : i in [0..#forms-1] *}) eq Cov`U  and Cov`V eq {* *} then
-	_Precomputations[1+idx] := [*
-	    &*[forms[1+i] : i in Cov`U],
-	    &+[FdCov[i+1]`degree : i in Cov`U],
-	    &+[FdCov[i+1]`order : i in Cov`U]
-	    *];
-	return _Precomputations[1+idx], _Precomputations;
+        _Precomputations[1+idx] := [*
+            &*[forms[1+i] : i in Cov`U],
+            &+[FdCov[i+1]`degree : i in Cov`U],
+            &+[FdCov[i+1]`order : i in Cov`U]
+            *];
+        return _Precomputations[1+idx], _Precomputations;
     end if;
 
     if  (Cov`V meet {* i : i in [0..#forms-1] *}) eq Cov`V  and Cov`U eq {* *} then
-	_Precomputations[1+idx] := [*
-	    &*[forms[1+i] : i in Cov`V],
-	    &+[FdCov[i+1]`degree : i in Cov`V],
-	    &+[FdCov[i+1]`order : i in Cov`V]
-	    *];
-	return _Precomputations[1+idx], _Precomputations;
+        _Precomputations[1+idx] := [*
+            &*[forms[1+i] : i in Cov`V],
+            &+[FdCov[i+1]`degree : i in Cov`V],
+            &+[FdCov[i+1]`order : i in Cov`V]
+            *];
+        return _Precomputations[1+idx], _Precomputations;
     end if;
 
     /* First, let us obtain the covariant U_cov */
     U_cov := Universe(forms)!1; U_deg := 0; U_ord := 0;
     for cov_idx in MultisetToSet(Cov`U) do
 
-	COV, _Precomputations := JointCovariant(FdCov, forms, cov_idx : Precomputations := _Precomputations);
-	cov, _ := Explode(COV);
+        COV, _Precomputations := JointCovariant(FdCov, forms, cov_idx : Precomputations := _Precomputations);
+        cov, _ := Explode(COV);
 
-	U_cov *:= cov ^ Multiplicity(Cov`U, cov_idx);
-	U_deg +:= FdCov[cov_idx+1]`degree * Multiplicity(Cov`U, cov_idx);
-	U_ord +:= FdCov[cov_idx+1]`order * Multiplicity(Cov`U, cov_idx);
+        U_cov *:= cov ^ Multiplicity(Cov`U, cov_idx);
+        U_deg +:= FdCov[cov_idx+1]`degree * Multiplicity(Cov`U, cov_idx);
+        U_ord +:= FdCov[cov_idx+1]`order * Multiplicity(Cov`U, cov_idx);
 
     end for;
 
@@ -120,12 +120,12 @@ function JointCovariant(FdCov, forms, idx : Precomputations := [])
     V_cov := Universe(forms)!1; V_deg := 0; V_ord := 0;
     for cov_idx in MultisetToSet(Cov`V) do
 
-	COV, _Precomputations := JointCovariant(FdCov, forms, cov_idx : Precomputations := _Precomputations);
-	cov, _ := Explode(COV);
+        COV, _Precomputations := JointCovariant(FdCov, forms, cov_idx : Precomputations := _Precomputations);
+        cov, _ := Explode(COV);
 
-	V_cov *:= cov ^ Multiplicity(Cov`V, cov_idx);
-	V_deg +:= FdCov[cov_idx+1]`degree * Multiplicity(Cov`V, cov_idx);
-	V_ord +:= FdCov[cov_idx+1]`order * Multiplicity(Cov`V, cov_idx);
+        V_cov *:= cov ^ Multiplicity(Cov`V, cov_idx);
+        V_deg +:= FdCov[cov_idx+1]`degree * Multiplicity(Cov`V, cov_idx);
+        V_ord +:= FdCov[cov_idx+1]`order * Multiplicity(Cov`V, cov_idx);
 
     end for;
 
@@ -142,10 +142,10 @@ function AllJointInvariants(FdCov, forms)
 
     _Precomputations := [];
     for i := 0 to #FdCov-1 do
-	if FdCov[1+i]`order eq 0 then
-	    COV, _Precomputations := JointCovariant(FdCov, forms, i : Precomputations := _Precomputations);
-	    Append(~LInv, COV[1]); Append(~LDeg, Integers()!COV[2]);
-	end if;
+        if FdCov[1+i]`order eq 0 then
+            COV, _Precomputations := JointCovariant(FdCov, forms, i : Precomputations := _Precomputations);
+            Append(~LInv, COV[1]); Append(~LDeg, Integers()!COV[2]);
+        end if;
     end for;
 
     return LInv, LDeg;
@@ -157,19 +157,19 @@ function GetJointCovariant(FdCov, forms, Cov)
 
     /* Is Cov equal to a product of the initial forms ? */
     if  (Cov`U meet {* i : i in [0..#forms-1] *}) eq Cov`U  and Cov`V eq {* *} then
-	return [
-	    &*[forms[1+i] : i in Cov`U],
-	    &+[FdCov[i+1]`degree : i in Cov`U],
-	    &+[FdCov[i+1]`order : i in Cov`U]
-	    ];
+        return [
+            &*[forms[1+i] : i in Cov`U],
+            &+[FdCov[i+1]`degree : i in Cov`U],
+            &+[FdCov[i+1]`order : i in Cov`U]
+            ];
     end if;
 
     if  (Cov`V meet {* i : i in [0..#forms-1] *}) eq Cov`V  and Cov`U eq {* *} then
-	return [
-	    &*[forms[1+i] : i in Cov`V],
-	    &+[FdCov[i+1]`degree : i in Cov`V],
-	    &+[FdCov[i+1]`order : i in Cov`V]
-	    ];
+        return [
+            &*[forms[1+i] : i in Cov`V],
+            &+[FdCov[i+1]`degree : i in Cov`V],
+            &+[FdCov[i+1]`order : i in Cov`V]
+            ];
     end if;
 
     _Precomputations := [];
@@ -178,12 +178,12 @@ function GetJointCovariant(FdCov, forms, Cov)
     U_cov := Universe(forms)!1; U_deg := 0; U_ord := 0;
     for cov_idx in MultisetToSet(Cov`U) do
 
-	COV, _Precomputations := JointCovariant(FdCov, forms, cov_idx : Precomputations := _Precomputations);
-	cov, _ := Explode(COV);
+        COV, _Precomputations := JointCovariant(FdCov, forms, cov_idx : Precomputations := _Precomputations);
+        cov, _ := Explode(COV);
 
-	U_cov *:= cov ^ Multiplicity(Cov`U, cov_idx);
-	U_deg +:= FdCov[cov_idx+1]`degree * Multiplicity(Cov`U, cov_idx);
-	U_ord +:= FdCov[cov_idx+1]`order * Multiplicity(Cov`U, cov_idx);
+        U_cov *:= cov ^ Multiplicity(Cov`U, cov_idx);
+        U_deg +:= FdCov[cov_idx+1]`degree * Multiplicity(Cov`U, cov_idx);
+        U_ord +:= FdCov[cov_idx+1]`order * Multiplicity(Cov`U, cov_idx);
 
     end for;
 
@@ -191,12 +191,12 @@ function GetJointCovariant(FdCov, forms, Cov)
     V_cov := Universe(forms)!1; V_deg := 0; V_ord := 0;
     for cov_idx in MultisetToSet(Cov`V) do
 
-	COV, _Precomputations := JointCovariant(FdCov, forms, cov_idx : Precomputations := _Precomputations);
-	cov, _ := Explode(COV);
+        COV, _Precomputations := JointCovariant(FdCov, forms, cov_idx : Precomputations := _Precomputations);
+        cov, _ := Explode(COV);
 
-	V_cov *:= cov ^ Multiplicity(Cov`V, cov_idx);
-	V_deg +:= FdCov[cov_idx+1]`degree * Multiplicity(Cov`V, cov_idx);
-	V_ord +:= FdCov[cov_idx+1]`order * Multiplicity(Cov`V, cov_idx);
+        V_cov *:= cov ^ Multiplicity(Cov`V, cov_idx);
+        V_deg +:= FdCov[cov_idx+1]`degree * Multiplicity(Cov`V, cov_idx);
+        V_ord +:= FdCov[cov_idx+1]`order * Multiplicity(Cov`V, cov_idx);
 
     end for;
 
@@ -214,12 +214,12 @@ function FirstJointInvariants(FdCov, forms, nb)
 
     _Precomputations := [];
     for i := 0 to #FdCov-1 do
-	if FdCov[1+i]`order eq 0 then
-	    COV, _Precomputations := JointCovariant(FdCov, forms, i :
-		Precomputations := _Precomputations);
-	    Append(~LInv, COV[1]); Append(~LDeg, Integers()!COV[2]);
-	end if;
-	if #LInv eq nb then break; end if;
+        if FdCov[1+i]`order eq 0 then
+            COV, _Precomputations := JointCovariant(FdCov, forms, i :
+                Precomputations := _Precomputations);
+            Append(~LInv, COV[1]); Append(~LDeg, Integers()!COV[2]);
+        end if;
+        if #LInv eq nb then break; end if;
     end for;
 
     return LInv, LDeg;
@@ -230,15 +230,15 @@ function IthJointInvariant(FdCov, forms, idx)
 
     jdx := 0;  Inv := Universe(forms)!0; Deg := 0;
     for i := 0 to #FdCov-1 do
-	if FdCov[1+i]`order eq 0 then
-	    jdx +:= 1;
-	    if jdx eq idx then
-		COV, Prc := JointCovariant(FdCov, forms, i);
-		delete Prc;
-		Inv := COV[1]; Deg := Integers()!COV[2];
-		break i;
-	    end if;
-	end if;
+        if FdCov[1+i]`order eq 0 then
+            jdx +:= 1;
+            if jdx eq idx then
+                COV, Prc := JointCovariant(FdCov, forms, i);
+                delete Prc;
+                Inv := COV[1]; Deg := Integers()!COV[2];
+                break i;
+            end if;
+        end if;
     end for;
 
     return Inv, Deg;
