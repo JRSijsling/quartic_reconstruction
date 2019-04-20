@@ -562,6 +562,7 @@ intrinsic IsGL2GeometricEquivalent(_f::RngUPolElt, _F::RngUPolElt, deg::RngIntEl
     if Degree(_f) gt 4 and Degree(_f) lt p and
        Degree(_F) gt 4 and Degree(_F) lt p then
 
+        vprintf IsGL2Equiv, 1 : "Covariant reduction step\n";
 	Cf := CovOrd4Deg2([* _f, 1, deg *])[1];
 	CF := CovOrd4Deg2([* _F, 1, deg *])[1];
 
@@ -572,7 +573,8 @@ intrinsic IsGL2GeometricEquivalent(_f::RngUPolElt, _F::RngUPolElt, deg::RngIntEl
 	    return ret, CheckResult(MF, _f, _F, deg);
 
 	end if;
-
+    else
+        vprintf IsGL2Equiv, 1 : "Covariant reduction is not possible\n";
     end if;
 
     /* Main algorithm */

@@ -468,7 +468,7 @@ function Genus3ConicAndQuarticForC4(JI : models := true)
 	    xi := -c33/c13; eta := 0;
 	    QF := FF;
 	else
-	    PCx := PolynomialRing(PC); X := PCx.1;
+	    PCx := PolynomialRing(FF); X := PCx.1;
 	    QF := quo<PCx | X^2+(c11*c33-1/4*c13^2)/c11/c22>; a := QF.1;
 	    xi := -1/2*c13/c11; eta := a;
 	end if;

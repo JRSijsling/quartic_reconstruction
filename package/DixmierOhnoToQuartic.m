@@ -472,7 +472,10 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
 
         vprint Reconstruction : "Quadratic relations suffice.";
 
-        V := PointsOverSplittingField(PCI[1,2]);
+        V := Points(PCI[1,2]);
+        if #V eq 0 then
+            V := PointsOverSplittingField(PCI[1,2]);
+        end if;
         return PolynomialRing(Ring(Universe(V)))!Eltseq(Random(V));
 
     end if;
