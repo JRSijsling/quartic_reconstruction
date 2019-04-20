@@ -136,7 +136,7 @@ function TernaryQuartic_S3(I0)
 FF := Universe(I0);
 R<a,b> := RationalFunctionField(FF, 2);
 S<X,Y,Z> := PolynomialRing(R, 3);
-f := X^3*Z + Y^4 + a*Y^2*Z^2 + a*Y*Z^3 + b*Z^4;
+f := X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
 
 I, W := DixmierOhnoInvariants(f);
 inds := [ i : i in [1..#I] | I[i] ne 0 ];
@@ -155,9 +155,9 @@ Sch := Scheme(A, eqns);
 Pts := [ Eltseq(pt) : pt in Points(Sch) ];
 for Pt in Pts do
     a, b := Explode(Pt);
-    if not ((a eq 0 and b eq 0) or (a eq -27/8 and b eq -243/256)) then
+    if not (a eq 0 and b eq 0) then
         S<X,Y,Z> := PolynomialRing(FF, 3);
-        f := X^3*Z + Y^4 + a*Y^2*Z^2 + a*Y*Z^3 + b*Z^4;
+        f := X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
         return f;
     end if;
 end for;

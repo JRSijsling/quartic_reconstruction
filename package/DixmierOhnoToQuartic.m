@@ -563,6 +563,10 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
 
     FF := Universe(DO);
 
+    if Type(FF) ne FldRat then
+        minimize := false;
+    end if;
+
     if Type(FF) eq RngInt then
         return
            $$(ChangeUniverse(DO, Rationals()) : exact := exact, search_point := search_point);
@@ -590,37 +594,29 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
         vprintf Reconstruction, 1 : "Automorphism group C9\n";
         aut := SmallGroup(9, 1);
         twists := [X^3*Y + Y^3*Z + Z^4];
-        return twists[1], aut, twists;
-    end if;
 
     /* G48 */
-    if IsInStratumG48(DO) then
+    elif IsInStratumG48(DO) then
         vprintf Reconstruction, 1 : "Automorphism group G48 \n";
         aut := SmallGroup(48, 33);
         twists := [X^4 + (Y^3 - Z^3)*Z];
-        return twists[1], aut, twists;
-    end if;
 
     /* G96 */
-    if IsInStratumG96(DO) then
+    elif IsInStratumG96(DO) then
         vprintf Reconstruction, 1 : "Automorphism group G96 \n";
         aut := SmallGroup(96, 64);
         twists := [X^4 + Y^4 + Z^4];
-        return twists[1], aut, twists;
-    end if;
 
     /* G168 */
-    if IsInStratumG168(DO) then
+    elif IsInStratumG168(DO) then
         vprintf Reconstruction, 1 : "Automorphism group G168 \n";
         aut := SmallGroup(168, 42);
         twists := [X^3*Y + Y^3*Z + Z^3*X];
-        return twists[1], aut, twists;
-    end if;
 
     /*** One dimensional cases ***/
 
     /* C6 */
-    if IsInStratumC6(DO) then
+    elif IsInStratumC6(DO) then
         vprintf Reconstruction, 1 : "Automorphism group C6 \n";
         aut := SmallGroup(6, 2);
         if (12*I09^2+169*J18) ne 0 then
@@ -631,20 +627,16 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
         end if;
 
         twists := [ Z^3*Y+ a*X^4+a*X^2*Y^2+Y^4 ];
-        return twists[1], aut, twists;
-    end if;
 
     /* G16 */
-    if IsInStratumG16(DO) then
+    elif IsInStratumG16(DO) then
         vprintf Reconstruction, 1 : "Automorphism group G16 \n";
         aut := SmallGroup(16, 13);
         a := -9/4*I03^3/I09;
         twists := [ X^4 + (Y^3 + a*Y*Z^2 + a*Z^3)*Z ];
-        return twists[1], aut, twists;
-    end if;
 
     /* S4 */
-    if IsInStratumS4(DO) then
+    elif IsInStratumS4(DO) then
         vprintf Reconstruction, 1 : "Automorphism group S4 \n";
         aut := SmallGroup(24, 12);
         den := 120*I03^2*I06-61*I03*I09+23*I03*J09+1920*I06^2+300*I12;
@@ -654,83 +646,60 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
             a := -6;
         end if;
         twists := [ X^4 + Y^4 + Z^4 + a*(X^2*Y^2 + Z^2*Y^2 + X^2*Z^2) ];
-        return twists[1], aut, twists;
-    end if;
 
     /*** Two dimensional cases ***/
 
     /* C3 */
-    if IsInStratumC3(DO) then
+    elif IsInStratumC3(DO) then
         vprintf Reconstruction, 1 : "Automorphism group C3 \n";
         aut := SmallGroup(3, 1);
-        twists := [
-            TernaryQuartic_C3(DO)
-            ];
-        return twists[1], aut, twists;
-    end if;
+        twists := [ TernaryQuartic_C3(DO) ];
 
     /* D8 */
-    if IsInStratumD8(DO) then
+    elif IsInStratumD8(DO) then
         vprintf Reconstruction, 1 : "Automorphism group D8 \n";
         aut := SmallGroup(8, 3);
         /*
         if I12 ne 0 then
-            twists := [
-                TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point)
-                ];
+            twists := [ TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point) ];
         else
-            twists := [
-                TernaryQuartic_D8_I12eq0(DO)
-                ];
+            twists := [ TernaryQuartic_D8_I12eq0(DO) ];
         end if;
         */
         twists := [ TernaryQuartic_D8(DO) ];
-        return twists[1], aut, twists;
-    end if;
 
     /* S3 */
-    if IsInStratumS3(DO) then
+    elif IsInStratumS3(DO) then
         vprintf Reconstruction, 1 : "Automorphism group S3 \n";
         aut := SmallGroup(6, 1);
         /*
         if I12 ne 0 then
-            twists := [
-                TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point)
-                ];
+            twists := [ TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point) ];
         else
-            twists := [
-                TernaryQuartic_S3_I12eq0(DO)
-                ];
+            twists := [ TernaryQuartic_S3_I12eq0(DO) ];
         end if;
         */
         twists := [ TernaryQuartic_S3(DO) ];
-        return twists[1], aut, twists;
-    end if;
 
     /*** Three dimensional case ***/
 
     /* D4 */
-    if IsInStratumD4(DO) then
+    elif IsInStratumD4(DO) then
         vprintf Reconstruction, 1 : "Automorphism group D4\n";
         aut := SmallGroup(4, 2);
         if I12 ne 0 then
-            twists := [
-                TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point)
-                ];
+            twists := [ TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point) ];
         else
-            twists := [
-                TernaryQuartic_D4_I12eq0(DO)
-                ];
+            twists := [ TernaryQuartic_D4_I12eq0(DO) ];
         end if;
-        return twists[1], aut, twists;
-    end if;
 
     /*** Otherwise (C2 or <Id>) ***/
-    if I12 ne 0 then
-        twists := [
-            TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point)
-            ];
+    elif I12 ne 0 then
+        twists := [ TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point) ];
     end if;
 
+    if minimize then
+        twists := [ MinimizeReducePlaneQuartic(twist) : twist in twists ];
+    end if;
     return twists[1], aut, twists;
 end intrinsic;
