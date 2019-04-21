@@ -69,7 +69,8 @@ end function;
 
 function CoboundaryRandom(A : SmallCoboundary := true, BadPrimesList := []);
 
-    vprintf Reconstruction, 1 : "Looking for a coboundary with Serre's algorithm\n";
+    vprint Reconstruction : "";
+    vprintf Reconstruction : "Looking for a coboundary with Serre's algorithm\n";
 
     L := BaseRing(A); s := L.1;
     g := MinimalPolynomial(s);
@@ -89,7 +90,8 @@ function CoboundaryRandom(A : SmallCoboundary := true, BadPrimesList := []);
 
         TT := Cputime();
         nb +:= 1;
-        vprintf Reconstruction, 1 : "\nDescent try %o :\n", nb;
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "\nDescent try %o :\n", nb;
 
         B0 := Matrix(BaseRing(A), [ [ ( Random(D) + Random(D)*s ) : c in Eltseq(row) ] : row in Rows(A) ]);
         B := B0 + A * ConjugateMatrix(sigma, B0);
@@ -110,8 +112,10 @@ function CoboundaryRandom(A : SmallCoboundary := true, BadPrimesList := []);
                 den := den div &*[ p^Valuation(den, p) : p in BadPrimesList ];
             end if;
 
-            vprintf Reconstruction, 1 : "Checking coboundary for smallness (%o digits / %o digits)...\n", Ceiling(Log(10, num)), Ceiling(Log(10, den));
+            vprint Reconstruction : "";
+            vprintf Reconstruction : "Checking coboundary for smallness (%o digits / %o digits)...\n", Ceiling(Log(10, num)), Ceiling(Log(10, den));
 
+            vprint Reconstruction, 2 : "";
             vprintf Reconstruction, 2 : "den reduced := %o\n", den;
 
             Fac_den := Factorization(den
@@ -120,17 +124,21 @@ function CoboundaryRandom(A : SmallCoboundary := true, BadPrimesList := []);
 
             if (FactorizationToInteger(Fac_den) eq den) then
 
+                vprint Reconstruction, 2 : "";
                 vprintf Reconstruction, 2 : "den completely factorized, now num := %o;\n", num;
 
                 Fac_num := Factorization(num : MPQSLimit := 0, ECMLimit
                     := ECMLimit, PollardRhoLimit := 10^4, Bases := 10, Proof := false);
 
                 if (FactorizationToInteger(Fac_num) eq num) then
+                    vprint Reconstruction, 2 : "";
                     vprintf Reconstruction, 2 : "This num is also completely factorized\n\n";
 
-                    vprintf Reconstruction, 1 : "So, we found a smooth descent morphism B, let us return it :-)\n";
+                    vprint Reconstruction : "";
+                    vprintf Reconstruction : "So, we found a smooth descent morphism B, let us return it :-)\n";
 
                     bp := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_den ]);
+                    vprint Reconstruction : "";
                     vprint Reconstruction : "Further primes in coboundary:";
                     vprint Reconstruction : bp;
 
@@ -140,7 +148,8 @@ function CoboundaryRandom(A : SmallCoboundary := true, BadPrimesList := []);
                     return B, bp;
                 end if;
 
-                vprintf Reconstruction, 1 :
+                vprint Reconstruction : "";
+                vprintf Reconstruction :
                     "%o digits / %o digits remained... (%o s)\n\n",
                     Ceiling(Log(10, num div FactorizationToInteger(Fac_num))),
                     Ceiling(Log(10, den div
@@ -149,7 +158,8 @@ function CoboundaryRandom(A : SmallCoboundary := true, BadPrimesList := []);
 
             else
 
-                vprintf Reconstruction, 1 :
+                vprint Reconstruction : "";
+                vprintf Reconstruction :
                     "? / %o digits remained... (%o s)\n\n",
                     Ceiling(Log(10, den div FactorizationToInteger(Fac_den))),
                     Cputime(TT);
@@ -166,7 +176,8 @@ end function;
 function CoboundaryLinear(A : BadPrimesList := []);
     // Not great, finally...
 
-    vprintf Reconstruction, 1 : "Looking for a couboundary with LLL\n";
+    vprint Reconstruction : "";
+    vprintf Reconstruction : "Looking for a couboundary with LLL\n";
 
     L := BaseRing(A); s := L.1;
     g := MinimalPolynomial(s);
@@ -215,21 +226,26 @@ function CoboundaryLinear(A : BadPrimesList := []);
                 num := num div &*[ p^Valuation(num, p) : p in BadPrimesList ];
             end if;
 
-            vprintf Reconstruction, 1 : "Checking coboundary for smallness (%o digits)...\n", Ceiling(Log(10, num));
-            vprintf Reconstruction, 1 : "num := %o\n", num;
+            vprint Reconstruction : "";
+            vprintf Reconstruction : "Checking coboundary for smallness (%o digits)...\n", Ceiling(Log(10, num));
+            vprintf Reconstruction : "num := %o\n", num;
 
             Fac_num := Factorization(num : MPQSLimit := 0, ECMLimit := 10^3, PollardRhoLimit := 10^4, Bases := 4, Proof := false);
-            vprintf Reconstruction, 1 :
+            vprint Reconstruction : "";
+            vprintf Reconstruction :
                 "%o digits remained... \n\n",
                 Ceiling(Log(10, num div FactorizationToInteger(Fac_num)));
 
 
             if (FactorizationToInteger(Fac_num) eq num) then
+                vprint Reconstruction, 2 : "";
                 vprintf Reconstruction, 2 : "This num is also completely factorized\n\n";
 
-                vprintf Reconstruction, 1 : "So, we found a smooth descent morphism B, let us return it :-)\n";
+                vprint Reconstruction : "";
+                vprintf Reconstruction : "So, we found a smooth descent morphism B, let us return it :-)\n";
 
                 bp := Sort([ fac[1] : fac in Fac_num ] cat [ fac[1] : fac in Fac_num ]);
+                vprint Reconstruction : "";
                 vprint Reconstruction : "Further primes in coboundary:";
                 vprint Reconstruction : bp;
 

@@ -24,7 +24,7 @@
 function TernaryQuartic_S3_I12eq0(DO)
 
     FF := Universe(DO);
-    P3 := PolynomialRing(FF, 3); X := P3.1; Y := P3.2; Z := P3.3;
+    P3 := PolynomialRing(FF, 3); x := P3.1; y := P3.2; z := P3.3;
 
     I03,I06,I09,J09,I12,J12,I15,J15,I18,J18,I21,J21,I27 := Explode(DO);
 
@@ -50,14 +50,14 @@ function TernaryQuartic_S3_I12eq0(DO)
             else
                 a := -9/10; b := 27/800;
             end if;
-            return X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+            return x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
         end if;
         if 4*I03^2+15*I06 eq 0 then
             vprint Reconstruction : "_ 4*I03^2+15*I06 eq 0";
             l := -81/27496448*(25792*I03^3+3927*I09-9921*J09)/I03^4;
             a := 4014080/345789*l^2*I03^2+29056/4269*l*I03-873/1423;
             b := -2207744/38421*l^2*I03^2+10116/1423*l*I03+1917/5692;
-            return X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+            return x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
         end if;
         if I03^2+16*I06 eq 0 then
             vprint Reconstruction : "_ I03^2+16*I06 eq 0";
@@ -68,7 +68,7 @@ function TernaryQuartic_S3_I12eq0(DO)
             else
                 a := -9; b := -27;
             end if;
-            return X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+            return x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
         end if;
 
         l :=
@@ -80,7 +80,7 @@ function TernaryQuartic_S3_I12eq0(DO)
         b :=
             63078400/250912323*l^3*I09-47624192000/250912323*l^3*I06*I03-52481228800/2258210907*l^3*I03^3+7870720/13527*l^2*I06+82497536/9293049*l^2*I03^2+537428/114729*l*I03+130833/611888;
 
-        return X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+        return x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
 
     end if;
 
@@ -89,7 +89,7 @@ function TernaryQuartic_S3_I12eq0(DO)
     if I06 eq 0 then
         vprint Reconstruction : "_ I06 eq 0";
         a := 9/2; b := 27/32;
-        return X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+        return x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
     end if;
 
     if I03 eq 0 then
@@ -97,14 +97,14 @@ function TernaryQuartic_S3_I12eq0(DO)
         l := 27/8192000*I09*(400*I06^3+I09^2)/I06^5;
         a := 204800/621*l^2*I06-63/184;
         b := 10240/69*l^2*I06+135/736;
-        return X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+        return x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
     end if;
     if 11*I03^2+960*I06 eq 0 then
         vprint Reconstruction : "_ 11*I03^2+960*I06 eq 0";
         l := 81/88309760*(917323*I03^3-9623880*I09+9409560*J09)/I03^4;
         a := 1146880/87723*l^2*I03^2+91880/7581*l*I03+20313/20216;
         b := -114688/9747*l^2*I03^2+5154/2527*l*I03-4995/20216;
-        return X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+        return x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
     end if;
     if I03^2+16*I06 eq 0 then
         vprint Reconstruction : "_ I03^2+16*I06 eq 0";
@@ -114,7 +114,7 @@ function TernaryQuartic_S3_I12eq0(DO)
             l := 9/128*(9*I03^3-28*I09)/I03^4;
             a := -48/7*l*I03-9/7; b := -24/7*l*I03-54/35;
         end if;
-        return X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+        return x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
     end if;
 
     l :=
@@ -126,7 +126,7 @@ function TernaryQuartic_S3_I12eq0(DO)
     b :=
         -512/279464095701*l^2*(2156871680*I03^4*l^2+13123470540800*I03^2*I06*l^2-57179520*I03^3*l+131958466560*I03*I09*l^2-415287244800*I03*J09*l^2-190096343040000*I06^2*l^2+795179908224*I03*I06*l-1977596937*I03^2-396888316560*I09*l-62242480080*J09*l-666750864960*I06);
 
-    return X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+    return x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
 
 end function;
 
@@ -135,8 +135,9 @@ function TernaryQuartic_S3(I0)
 
 FF := Universe(I0);
 R<a,b> := RationalFunctionField(FF, 2);
-S<X,Y,Z> := PolynomialRing(R, 3);
-f := X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+S := PolynomialRing(R, 3);
+x := S.1; y := S.2; z := S.3;
+f := x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
 
 I, W := DixmierOhnoInvariants(f);
 inds := [ i : i in [1..#I] | I[i] ne 0 ];
@@ -156,8 +157,9 @@ Pts := [ Eltseq(pt) : pt in Points(Sch) ];
 for Pt in Pts do
     a, b := Explode(Pt);
     if not (a eq 0 and b eq 0) then
-        S<X,Y,Z> := PolynomialRing(FF, 3);
-        f := X^3*Z + Y^3*Z + X^2*Y^2 + a*X*Y*Z^2 + b*Z^4;
+        S := PolynomialRing(FF, 3);
+        x := S.1; y := S.2; z := S.3;
+        f := x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
         return f;
     end if;
 end for;
@@ -168,14 +170,14 @@ end function;
 function TernaryQuartic_C3(DO)
 
     FF := Universe(DO);
-    P3 := PolynomialRing(FF, 3); X := P3.1; Y := P3.2; Z := P3.3;
+    P3 := PolynomialRing(FF, 3); x := P3.1; y := P3.2; z := P3.3;
 
     I03,I06,I09,J09,I12,J12,I15,J15,I18,J18,I21,J21,I27 := Explode(DO);
 
     if J09 - 1/3*I09 eq 0 and J18 - 2/3*I18 eq 0 then
         vprint Reconstruction : "Dim. 1 model";
         b := 432*I18/I09^2;     /* I09 <> 0, otherwise the curve is singular */
-        return X^3*Z + Y^4 + b*Y*Z^3 + b*Z^4;
+        return x^3*z + y^4 + b*y*z^3 + b*z^4;
     end if;
 
     vprint Reconstruction : "Dim. 2 model :";
@@ -186,12 +188,12 @@ function TernaryQuartic_C3(DO)
         if I27 - 27*I09^3 eq 0 and J18 - 1/9*I18 eq 0 and J09 - 1/3*I09 eq 0 then
             a := 243/8*I18/(2*I09^2-9*I18); /* 2*I09^2-9*I18  <> 0, otherwise the curve is singular */
             b := 1/36*a^2 + 3/8*a;
-            return X^3*Z + Y^4 + a*Y^2*Z^2 + a*Y*Z^3 + b*Z^4;
+            return x^3*z + y^4 + a*y^2*z^2 + a*y*z^3 + b*z^4;
         end if;
 
         a := -387420489/8*I09^3/(14348907*I09^3+1024*I27); /* 14348907*I09^3+1024*I27 <> 0, otherwise the curve is singular */
         b := -1/12*a^2;
-        return X^3*Z + Y^4 + a*Y^2*Z^2 + a*Y*Z^3 + b*Z^4;
+        return x^3*z + y^4 + a*y^2*z^2 + a*y*z^3 + b*z^4;
 
     end if;
 
@@ -202,7 +204,7 @@ function TernaryQuartic_C3(DO)
             123201/160*I09^3 eq 0 and J18 eq 0 then
             a := 27/40*(-3*J09+I09)/(3*I09-J09); /* 23*I09-J09  <> 0, otherwise the curve is singular */
             b := -5/108*a^2 + 1/8*a;
-            return X^3*Z + Y^4 + a*Y^2*Z^2 + a*Y*Z^3 + b*Z^4;
+            return x^3*z + y^4 + a*y^2*z^2 + a*y*z^3 + b*z^4;
         end if;
 
         if I27 + 12895281/20480*J09^3 - 3781323/2560*J09^2*I09 +
@@ -211,7 +213,7 @@ function TernaryQuartic_C3(DO)
             then
             a := 27/10*(-3*J09+I09)/(2*I09+J09);/* 2*I09+J09  <> 0, otherwise the curve is singular */
             b := -5/252*a^2 + 3/14*a;
-            return X^3*Z + Y^4 + a*Y^2*Z^2 + a*Y*Z^3 + b*Z^4;
+            return x^3*z + y^4 + a*y^2*z^2 + a*y*z^3 + b*z^4;
         end if;
 
     end if;
@@ -221,7 +223,7 @@ function TernaryQuartic_C3(DO)
     b :=
         1/14400*a*(1680*I09^2*a-1400*I09*J09*a+280*J09^2*a-378*I09^2+1323*I09*J09-6000*I18*a-567*J09^2+7200*J18*a-16200*I18+24300*J18)/I18;
 
-    return X^3*Z + Y^4 + a*Y^2*Z^2 + a*Y*Z^3 + b*Z^4;
+    return x^3*z + y^4 + a*y^2*z^2 + a*y*z^3 + b*z^4;
 
 end function;
 
@@ -229,7 +231,7 @@ end function;
 function TernaryQuartic_D8_I12eq0(DO)
 
     FF := Universe(DO);
-    P3 := PolynomialRing(FF, 3); X := P3.1; Y := P3.2; Z := P3.3;
+    P3 := PolynomialRing(FF, 3); x := P3.1; y := P3.2; z := P3.3;
 
     I03,I06,I09,J09,I12,J12,I15,J15,I18,J18,I21,J21,I27 := Explode(DO);
 
@@ -249,23 +251,23 @@ function TernaryQuartic_D8_I12eq0(DO)
                 I06 + 189/320*I03^2 eq 0 then
                 a := -5/26244;
                 b := 1/54;
-                return a*X^4 + Y^4 + Z^4 + b*X^2*Y^2 + X*Y*Z^2;
+                return a*x^4 + y^4 + z^4 + b*x^2*y^2 + x*y*z^2;
             end if;
 
             a := -7/20736;
             b := -1/24;
-            return a*X^4 + Y^4 + Z^4 + b*X^2*Y^2 + X*Y*Z^2;
+            return a*x^4 + y^4 + z^4 + b*x^2*y^2 + x*y*z^2;
         end if;
 
         b := -1/72*(27*I03^3+432*I03*I06-176*I09-80*J09)/(81*I03^3+1296*I03*I06+32*I09);
         a := -11/36*b^2-1/216*b;
-        return a*X^4 + Y^4 + Z^4 + b*X^2*Y^2 + X*Y*Z^2;
+        return a*x^4 + y^4 + z^4 + b*x^2*y^2 + x*y*z^2;
     end if;
 
     b := 1/72*(J09+13*I09)/(-3*J09+I09);
     a := 1/36*b^2*(72*b+17)/(72*b+1);
 
-    return a*X^4 + Y^4 + Z^4 + b*X^2*Y^2 + X*Y*Z^2;
+    return a*x^4 + y^4 + z^4 + b*x^2*y^2 + x*y*z^2;
 
 end function;
 
@@ -274,8 +276,9 @@ function TernaryQuartic_D8(I0)
 
 FF := Universe(I0);
 R<a,b> := RationalFunctionField(FF, 2);
-S<X,Y,Z> := PolynomialRing(R, 3);
-f := a*X^4 + Y^4 + Z^4 + b*X^2*Y^2 + X*Y*Z^2;
+S := PolynomialRing(R, 3);
+x := S.1; y := S.2; z := S.3;
+f := a*x^4 + y^4 + z^4 + b*x^2*y^2 + x*y*z^2;
 
 I, W := DixmierOhnoInvariants(f);
 inds := [ i : i in [1..#I] | I[i] ne 0 ];
@@ -295,8 +298,9 @@ Pts := [ Eltseq(pt) : pt in Points(Sch) ];
 for Pt in Pts do
     a, b := Explode(Pt);
     if not (a eq 0 and b eq 0) then
-        S<X,Y,Z> := PolynomialRing(FF, 3);
-        f := a*X^4 + Y^4 + Z^4 + b*X^2*Y^2 + X*Y*Z^2;
+        S := PolynomialRing(FF, 3);
+        x := S.1; y := S.2; z := S.3;
+        f := a*x^4 + y^4 + z^4 + b*x^2*y^2 + x*y*z^2;
         return f;
     end if;
 end for;
@@ -321,17 +325,17 @@ end function;
 function TernaryQuartic_D4_I12eq0(DO)
 
     FF := Universe(DO);
-    P3 := PolynomialRing(FF, 3); X := P3.1; Y := P3.2; Z := P3.3;
+    P3 := PolynomialRing(FF, 3); x := P3.1; y := P3.2; z := P3.3;
 
     I03,I06,I09,J09,I12,J12,I15,J15,I18,J18,I21,J21,I27 := Explode(DO);
 
     Dim2Model := func <
         a, b |
-        X^4 + 2*X^2*Y^2 + 2*a*X^2*Y*Z + (a^2-2*b)*X^2*Z^2 + a*Y^4 + 4*(a^2-2*b)*Y^3*Z + 6*(a^3-3*a*b)*Y^2*Z^2 + 4*(a^4-4*a^2*b + 2*b^2)*Y*Z^3 + (a^5-5*a^3*b+5*a*b^2)*Z^4 >;
+        x^4 + 2*x^2*y^2 + 2*a*x^2*y*z + (a^2-2*b)*x^2*z^2 + a*y^4 + 4*(a^2-2*b)*y^3*z + 6*(a^3-3*a*b)*y^2*z^2 + 4*(a^4-4*a^2*b + 2*b^2)*y*z^3 + (a^5-5*a^3*b+5*a*b^2)*z^4 >;
 
     Dim3Model := func <
         a, b, c |
-        (a+3)*X^4 + (4*a^2-8*b+4*a)*X^3*Y + (12*c+4*b)*X^3*Z + (6*a^3-18*a*b+18*c+2*a^2)*X^2*Y^2 + (12*a*c+4*a*b)*X^2*Y*Z + (6*b*c+2*b^2)*X^2*Z^2 + (4*a^4-16*a^2*b+8*b^2+16*a*c+2*a*b-6*c)*X*Y^3 + (12*a^2*c-24*b*c+2*a^2*b-4*b^2+6*a*c)*X*Y^2*Z + (36*c^2+2*a*b^2-4*a^2*c+6*b*c)*X*Y*Z^2 + (4*b^2*c-8*a*c^2+2*a*b*c-6*c^2)*X*Z^3 + (a^5-5*a^3*b+5*a*b^2+5*a^2*c-5*b*c+b^2-2*a*c)*Y^4 + (4*a^3*c-12*a*b*c+12*c^2+4*a^2*c-8*b*c)*Y^3*Z + (6*a*c^2+a^2*b^2-2*b^3-2*a^3*c+4*a*b*c+9*c^2)*Y^2*Z^2 + (4*b*c^2+4*b^2*c-8*a*c^2)*Y*Z^3 + (b^3*c-3*a*b*c^2+3*c^3+a^2*c^2-2*b*c^2)*Z^4 >;
+        (a+3)*x^4 + (4*a^2-8*b+4*a)*x^3*y + (12*c+4*b)*x^3*z + (6*a^3-18*a*b+18*c+2*a^2)*x^2*y^2 + (12*a*c+4*a*b)*x^2*y*z + (6*b*c+2*b^2)*x^2*z^2 + (4*a^4-16*a^2*b+8*b^2+16*a*c+2*a*b-6*c)*x*y^3 + (12*a^2*c-24*b*c+2*a^2*b-4*b^2+6*a*c)*x*y^2*z + (36*c^2+2*a*b^2-4*a^2*c+6*b*c)*x*y*z^2 + (4*b^2*c-8*a*c^2+2*a*b*c-6*c^2)*x*z^3 + (a^5-5*a^3*b+5*a*b^2+5*a^2*c-5*b*c+b^2-2*a*c)*y^4 + (4*a^3*c-12*a*b*c+12*c^2+4*a^2*c-8*b*c)*y^3*z + (6*a*c^2+a^2*b^2-2*b^3-2*a^3*c+4*a*b*c+9*c^2)*y^2*z^2 + (4*b*c^2+4*b^2*c-8*a*c^2)*y*z^3 + (b^3*c-3*a*b*c^2+3*c^3+a^2*c^2-2*b*c^2)*z^4 >;
 
     /* Are we in the dim 2 locus ? */
     if

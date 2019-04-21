@@ -85,6 +85,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
     If the flag search_point is set to true, then the algorithm tries to find a
     rational point of the Mestre conic of the associated binary form.}
 
+    vprint Reconstruction : "";
     vprint Reconstruction : "Start of quartic reconstruction.";
     I03,I06,I09,J09,I12,J12,I15,J15,I18,J18,I21,J21,I27 := Explode(DO);
     F := Universe(DO);
@@ -92,6 +93,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
     ratbase := (Type(F) eq FldRat) and (F eq Rationals());
     bp0 := [];
     if ratbase then
+        vprint Reconstruction : "";
         vprint Reconstruction : "Factorizing numerator and denominator of I12...";
         Fac_num := Factorization(Numerator(I12));
         Fac_den := Factorization(Denominator(I12));
@@ -100,19 +102,23 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         vprint Reconstruction : bp0;
     end if;
 
+    vprint Reconstruction : "";
     vprint Reconstruction : "Determining joint Shioda invariants from Dixmier-Ohno invariants...";
     JointShioda := DixmierOhnoToJointShioda(DO);
 
+    vprint Reconstruction, 2 : "";
     vprint Reconstruction, 2 : "Joint Shioda invariants:", JointShioda;
     if ratbase then
         WJS := [2..10];
         JointShioda, lambda1 := WPSMinimize(WJS, JointShioda);
+        vprint Reconstruction, 2 : "";
         vprint Reconstruction, 2 : "Joint Shioda invariants after minimization:", JointShioda;
     else
         lambda1 := Parent(DO[1]) ! 1;
     end if;
 
     repeat
+        vprint Reconstruction : "";
         vprint Reconstruction : "Reconstructing binary octic b_8...";
         b8, lambda2 := HyperellipticPolynomialFromJointShiodaInvariants(JointShioda : search_point := search_point, Deterministic := false);
         b8 *:= (1/lambda1) * lambda2;
@@ -123,8 +129,10 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
             error "[DixmierOhnoToQuartic] b_8 has a root of order >= 4, not yet implemented";
         end if;
 
+        vprint Reconstruction : "";
         vprint Reconstruction : "Reconstructed binary octic b_8:", Homogenization(b8 : degree := 8);
 
+        vprint Reconstruction : "";
         vprint Reconstruction : "Reconstructing binary quartic b_4...";
         b4 := DixmierOhnoToBinaryQuartic(DO, b8);
         /* Alternative version: */
@@ -137,10 +145,13 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         b0h := S ! DO[3];
         /* Alternative version: */
         //b0h := S ! (lambda1^(-8) * DO[3]);
+        vprint Reconstruction : "";
         vprint Reconstruction : "Reconstructed constant b_0:", b0h;
 
+        vprint Reconstruction : "";
         vprint Reconstruction : "Final inversion...";
         f := BinaryToTernary([b8h, b4h, b0h]);
+        vprint Reconstruction : "";
         vprint Reconstruction : "f is", f;
 
         isDescended := &and( &cat[ [ coeff in F : coeff in Coefficients(b) ] : b in [ b8h, b4h, b0h ] ] );
@@ -156,22 +167,26 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
             break;
         end if;
 
+        vprint Reconstruction : "";
         vprint Reconstruction : "Conjugate isomorphism A...";
         A := NormalizeCocycle(IsomorphismFromB8(b8 : RandomOne := true));
 
         _, ANormDen := IsSquare(Abs(Denominator(Norm(Determinant(A+Parent(A)!1)))));
         ANormDen := ANormDen div &*[ p^Valuation(ANormDen, p) : p in bp0 ];
 
-        vprintf Reconstruction, 1 : "Lazy factorization of ANormDen (%o digits)\n", Ceiling(Log(10, ANormDen));
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Lazy factorization of ANormDen (%o digits)\n", Ceiling(Log(10, ANormDen));
         Fac_ANormDen := Factorization(ANormDen
             : MPQSLimit := 0, ECMLimit := 10^4, PollardRhoLimit := 10^4, Bases := 10,  Proof := false
             );
 
+        vprint Reconstruction, 2 : "";
         vprintf Reconstruction, 2 : "Found %o\n", Fac_ANormDen;
 
         ANormDenFact := FactorizationToInteger(Fac_ANormDen);
 
         if ANormDenFact eq ANormDen then
+            vprint Reconstruction : "";
             vprint Reconstruction : "ANormDen completely factorized, let us descend...";
             bp0 := Sort(bp0 cat [ p : p in [ fac[1] : fac in Fac_ANormDen ] | not p in bp0 ]);
             R := PolynomialRing(F, 3);
@@ -184,7 +199,8 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
 
         end if;
 
-        vprintf Reconstruction, 1 : "Uncomplete factorization -  a cofactor of %o digit remains - let us start from another b8", Ceiling(Log(10, ANormDen div ANormDenFact));
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Uncomplete factorization -  a cofactor of %o digit remains - let us start from another b8", Ceiling(Log(10, ANormDen div ANormDenFact));
 
 
     until false;
@@ -196,9 +212,11 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         f *:= (gcd_den/gcd_num);
         lcm_num := LCM([ Denominator(coeff) : coeff in Coefficients(f) ]);
         f *:= lcm_num;
-        vprintf Reconstruction,1 : "A first model over the rationals is given by %o\n", f;
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "A first model over the rationals is given by %o\n", f;
 
         if minimize then
+            vprint Reconstruction : "";
             vprint Reconstruction : "Reducing coefficients...";
 
             f := MinimizeReducePlaneQuartic(f : BadPrimesList := bp0,
@@ -215,8 +233,8 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO::SeqEnum : exact := f
         gcd, L := XGCDUnique([ W[i] : i in indices ]);
         I := DixmierOhnoInvariants(f);
         lambda3 := &*[ (DO[i] / I[i])^(L[i]) : i in indices ];
-        x1 := R.1; x2 := R.2; x3 := R.3;
-        f := (1/lambda3) * Evaluate(f, [ lambda3*x1, x2, x3 ]);
+        x := R.1; y := R.2; z := R.3;
+        f := (1/lambda3) * Evaluate(f, [ lambda3*x, y, z ]);
         return f, TernaryToBinary(f);
     end if;
 
@@ -257,6 +275,7 @@ end function;
 
 function HyperellipticPolynomialFromJointShiodaInvariants(JS : search_point := true, Deterministic := false)
 
+    vprint Reconstruction : "";
     vprint Reconstruction : "Converting joint invariants to Shioda invariants...";
     S2, S3, S4, S5, S6, S7, S8, S9, S10 := Explode(ShiodaInvariantsFromJointShiodaInvariants(JS));
     vprint Reconstruction, 2 : "Shioda invariants:", [S2, S3, S4, S5, S6, S7, S8, S9, S10];
@@ -274,6 +293,7 @@ function HyperellipticPolynomialFromJointShiodaInvariants(JS : search_point := t
         return 0, 0;
     end if;
 
+    vprint Reconstruction : "";
     vprint Reconstruction : "Determining non-twisted binary octic from Shioda invariants...";
     b8 := HyperellipticPolynomialFromShiodaInvariants([S2, S3, S4, S5, S6, S7, S8, S9, S10] : RationalModel := search_point, Deterministic := Deterministic);
     K := BaseRing(Parent(b8));
@@ -292,10 +312,10 @@ function HyperellipticPolynomialFromJointShiodaInvariants(JS : search_point := t
             bs[Idx[i]] := Parent(JS[1])!IthJointInvariant(S8S4Cov, [0*b8, b8], Idx[i]);
         end if;
     end for;
-    vprint Reconstruction, 2 :
-        "Joint Shioda Invariants of b8 in used:",
-        [ [* i, bs[Idx[i]] *] : i in [1..#Idx] | C[i] ne 0 ];
+    vprint Reconstruction, 2 : "";
+    vprint Reconstruction, 2 : "Joint Shioda Invariants of b8 in used:", [ [* i, bs[Idx[i]] *] : i in [1..#Idx] | C[i] ne 0 ];
 
+    vprint Reconstruction : "";
     vprint Reconstruction : "Recovering the twisting scalar...";
     /* Recovering the twisting scalar */
     lbdinvpowg := 1; for j := 1 to #Idx do
@@ -326,6 +346,7 @@ function HyperellipticPolynomialFromJointShiodaInvariants(JS : search_point := t
         Kl := quo<Parent(x) | Pl>;
     end if;
 
+    vprint Reconstruction : "";
     vprint Reconstruction : "An extension of the base field of the binary octic was required to obtain the twisting scalar.";
     vprint Reconstruction, 2 : "Twisting scalar:", 1/Kl.1;
     return (PolynomialRing(Kl)!b8), 1/Kl.1;
@@ -377,6 +398,7 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
     B8 := Pt ! Coefficients(b8);
 
     /* We know proceed to use the invariants that give linear relations */
+    vprint Reconstruction : "";
     vprint Reconstruction : "Trying with linear relations only...";
 
     LinearJointInvsNames := [ "j3", "j4c", "j5e", "j5f", "j6h", "j6i" ];
@@ -390,10 +412,12 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
         Append(~LEQ, Pa!(COV[1]) - inv);
     end for;
 
+    vprint Reconstruction, 2 : "";
     vprint Reconstruction, 2 : "Linear constraints :", LEQ;
     II := Scheme(AffineSpace(Pa), LEQ);
 
     DimII := Dimension(II);
+    vprint Reconstruction, 2 : "";
     vprint Reconstruction, 2 : "It yields a scheme of dimension", DimII;
 
     /* Should not happen */
@@ -404,6 +428,7 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
     /* THE generic case */
     if DimII eq 0 then
 
+        vprint Reconstruction : "";
         vprint Reconstruction : "Linear relations suffice.";
 
         V := RationalPoints(II);
@@ -416,6 +441,7 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
     end if;
 
     /* Strange situation, we try to add degree 2 constraints */
+    vprint Reconstruction : "";
     vprint Reconstruction : "Adding more, now quadratic, constraints...";
 
     QuadJointInvsNames := [ "j3a", "j4a", "j4b", "j5c", "j5d", "j6e", "j6f", "j6g" ];
@@ -448,15 +474,18 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
         ];
 
     II := Scheme(AffineSpace(Pa), LEQ);
+    vprint Reconstruction, 2 : "";
     vprint Reconstruction, 2 : "Ideal in the coefficients:", II;
 
     /* Radical components */
     PCI := PrimeComponents(II);
+    vprint Reconstruction, 2 : "";
     vprint Reconstruction, 2 : "It yields a scheme with", #PCI, "prime components :";
 
     /* Let us make a first filter */
     _PCI := []; idx := 0; for PI in PCI do idx+:=1;
         DimII := Dimension(PI);
+        vprint Reconstruction, 2 : "";
         vprint Reconstruction, 2 : "    _ Component",  idx, "is of dimension", DimII;
         if DimII ge 0 then
             Append(~_PCI, [* DimII, PI *]);
@@ -470,6 +499,7 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
     /* Only one radical component, with one point, perfect, we can decide :-) */
     if #PCI eq 1 and PCI[1, 1] eq 0 and Degree(PCI[1,2]) eq 1 then
 
+        vprint Reconstruction : "";
         vprint Reconstruction : "Quadratic relations suffice.";
 
         V := Points(PCI[1,2]);
@@ -481,6 +511,7 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
     end if;
 
     /* Hum :-/ let us continue our search */
+    vprint Reconstruction, 2 : "";
     vprint Reconstruction, 2 : "\nHum... let us investigate, with constraints of higher degrees, which one of these components is the good one";
 
     OtherJointInvsNames   := [ "j5f", "j6", "j6a", "j6b", "j6c", "j6i", "j7", "j7a", "j7b", "j7c", "j7d", "j7e", "j7f", "j7g", "j7h", "j7i", "j7j", "j8", "j8a", "j8b", "j8c", "j8d", "j8e", "j8f", "j8g", "j8h", "j8i", "j3a", "j9", "j9a", "j9b", "j9c", "j4c", "j9d", "j5", "j10", "j5a", "j10a"];
@@ -502,12 +533,14 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
         /* Radical components */
         II := Scheme(AffineSpace(Pa), LEQ);
         _PCI := PrimeComponents(II);
+        vprint Reconstruction, 2 : "";
         vprint Reconstruction, 2 : "Component", idx, "of dim", pci[1], "yields", #_PCI, "prime components";
 
         if #_PCI eq 0 then continue; end if;
 
         jdx := 0; for pi in _PCI do jdx+:=1;
             Dimpi := Dimension(pi);
+            vprint Reconstruction, 2 : "";
             vprint Reconstruction, 2 : "    _ Its component",  jdx, "is of dimension", Dimpi;
 
             if Dimpi gt 1 then
@@ -515,6 +548,7 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
             end if;
 
             V := PointsOverSplittingField(pi);
+            vprint Reconstruction, 2 : "";
             vprint Reconstruction, 2 : "        ... and has", #V, "points";
             for v in V do
                 b4 := PolynomialRing(Ring(Universe(V)))!Eltseq(v);
@@ -532,12 +566,11 @@ function DixmierOhnoToBinaryQuartic(DO, b8 : lambda := 1);
         error "[DixmierOhnoToQuartic] Error: there is no B4 compatible with B8 and DO";
     end if;
 
+    vprint Reconstruction, 2 : "";
     vprint Reconstruction, 2 : "\nWe finally found", #LST, "possible B4";
     if #LST gt 1 then
         vprint Reconstruction, 2 : "Let us return the first one ?!!";
     end if;
-
-    vprint Reconstruction, 2 : "\n";
 
     return LST[1];
 
@@ -572,7 +605,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
            $$(ChangeUniverse(DO, Rationals()) : exact := exact, search_point := search_point);
     end if;
 
-    P3 := PolynomialRing(FF, 3); X := P3.1; Y := P3.2; Z := P3.3;
+    P3 := PolynomialRing(FF, 3); x := P3.1; y := P3.2; z := P3.3;
 
     require
         (Characteristic(FF) eq 0) or (Characteristic(FF) gt 7)
@@ -591,33 +624,38 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
 
     /* C9 */
     if IsInStratumC9(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group C9\n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group C9\n";
         aut := SmallGroup(9, 1);
-        twists := [X^3*Y + Y^3*Z + Z^4];
+        twists := [x^3*y + y^3*z + z^4];
 
     /* G48 */
     elif IsInStratumG48(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group G48 \n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group G48 \n";
         aut := SmallGroup(48, 33);
-        twists := [X^4 + (Y^3 - Z^3)*Z];
+        twists := [x^4 + (y^3 - z^3)*z];
 
     /* G96 */
     elif IsInStratumG96(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group G96 \n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group G96 \n";
         aut := SmallGroup(96, 64);
-        twists := [X^4 + Y^4 + Z^4];
+        twists := [x^4 + y^4 + z^4];
 
     /* G168 */
     elif IsInStratumG168(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group G168 \n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group G168 \n";
         aut := SmallGroup(168, 42);
-        twists := [X^3*Y + Y^3*Z + Z^3*X];
+        twists := [x^3*y + y^3*z + z^3*x];
 
     /*** One dimensional cases ***/
 
     /* C6 */
     elif IsInStratumC6(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group C6 \n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group C6 \n";
         aut := SmallGroup(6, 2);
         if (12*I09^2+169*J18) ne 0 then
             a :=
@@ -626,18 +664,20 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
             a := 18/5*(18*I09^2-51*I09*J09-9*J09^2-154*I18+756*J18)/(36*I09^2-169*I18);
         end if;
 
-        twists := [ Z^3*Y+ a*X^4+a*X^2*Y^2+Y^4 ];
+        twists := [ z^3*y+ a*x^4+a*x^2*y^2+y^4 ];
 
     /* G16 */
     elif IsInStratumG16(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group G16 \n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group G16 \n";
         aut := SmallGroup(16, 13);
         a := -9/4*I03^3/I09;
-        twists := [ X^4 + (Y^3 + a*Y*Z^2 + a*Z^3)*Z ];
+        twists := [ x^4 + (y^3 + a*y*z^2 + a*z^3)*z ];
 
     /* S4 */
     elif IsInStratumS4(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group S4 \n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group S4 \n";
         aut := SmallGroup(24, 12);
         den := 120*I03^2*I06-61*I03*I09+23*I03*J09+1920*I06^2+300*I12;
         if den ne 0 then
@@ -645,19 +685,21 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
         else
             a := -6;
         end if;
-        twists := [ X^4 + Y^4 + Z^4 + a*(X^2*Y^2 + Z^2*Y^2 + X^2*Z^2) ];
+        twists := [ x^4 + y^4 + z^4 + a*(x^2*y^2 + z^2*y^2 + x^2*z^2) ];
 
     /*** Two dimensional cases ***/
 
     /* C3 */
     elif IsInStratumC3(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group C3 \n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group C3 \n";
         aut := SmallGroup(3, 1);
         twists := [ TernaryQuartic_C3(DO) ];
 
     /* D8 */
     elif IsInStratumD8(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group D8 \n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group D8 \n";
         aut := SmallGroup(8, 3);
         /*
         if I12 ne 0 then
@@ -670,7 +712,8 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
 
     /* S3 */
     elif IsInStratumS3(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group S3 \n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group S3 \n";
         aut := SmallGroup(6, 1);
         /*
         if I12 ne 0 then
@@ -685,7 +728,8 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
 
     /* D4 */
     elif IsInStratumD4(DO) then
-        vprintf Reconstruction, 1 : "Automorphism group D4\n";
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group D4\n";
         aut := SmallGroup(4, 2);
         if I12 ne 0 then
             twists := [ TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point) ];
@@ -699,8 +743,12 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
     end if;
 
     if minimize then
-        //twists := [ NormalizeGenericQuartic(twist) : twist in twists ];
+        //if #aut eq 0 then
+        //   twists := [ NormalizeGenericQuartic(twist) : twist in twists ];
+        //end if;
         twists := [ MinimizeReducePlaneQuartic(twist) : twist in twists ];
     end if;
+    /* Give variable names (bad practice)? */
+    R<x,y,z> := Parent(twists[1]);
     return twists[1], aut, twists;
 end intrinsic;
