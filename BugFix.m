@@ -12,7 +12,8 @@ intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt : BadPrimesList := [], Impr
  type := Type(BaseRing(Parent(f)));
  integral := type eq RngInt;
  if type eq FldRat then
-  integral, f := IsCoercible(PolynomialRing(Integers(),r), f*Denominator(f));
+  den := LCM([ Denominator(c) : c in Coefficients(f) ]);
+  integral, f := IsCoercible(PolynomialRing(Integers(),r), f*den);
  end if;
  require integral: "Polynomial over the integers or rationals expected.";
 
@@ -52,7 +53,6 @@ intrinsic MinimizeReducePlaneQuartic(f :: RngMPolElt : BadPrimesList := [], Impr
  _<x1,x2,x3> := Parent(res);
  vprintf PlaneQuartic,1: "Curve before Stoll reduction: %o\n",res;
  res, Trr := ReducePlaneCurve(res);
-
+ 
  return Rfin ! res, Lat*Trr;
 end intrinsic;
-
