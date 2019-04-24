@@ -8,4 +8,8 @@
   AutStrataChar0Equations.m
   AutStrataChar0Reconstruction.m
   DixmierOhnoToQuartic.m
+  g3twists_v2-0
+  {
+    +spec
+  }
 }

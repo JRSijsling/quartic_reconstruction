@@ -743,13 +743,15 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
     end if;
 
     if minimize then
-//        if #aut eq 0 then
-//            twists_old := twists; twists := [ ];
-//            for twist_old in twists_old do
-//                twist, aut := NormalizeGenericQuartic(twist_old);
-//                Append(~twists, twist);
-//            end for;
-//        end if;
+        /* Enable if you have quartic_isomorphisms
+        if #aut eq 0 then
+            twists_old := twists; twists := [ ];
+            for twist_old in twists_old do
+                twist, aut := NormalizeGenericQuartic(twist_old);
+                Append(~twists, twist);
+            end for;
+        end if;
+        */
         twists := [ MinimizeReducePlaneQuartic(twist) : twist in twists ];
     end if;
     /* Give variable names (bad practice)? */

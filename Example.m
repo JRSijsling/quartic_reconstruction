@@ -21,9 +21,6 @@
  *  Copyright 2016 R. Lercier, C. Ritzenthaler & J.R. Sijsling
  */
 
-AttachSpec("package/spec");
-AttachSpec("g3twists_v2-0/spec");
-
 SetVerbose("Reconstruction", 1);
 SetVerbose("G3Twists", 1);
 SetVerbose("PlaneQuartic", 1);
