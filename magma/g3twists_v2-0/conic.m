@@ -49,103 +49,6 @@ import "conic_uv.m" : Genus3ConicAndQuarticUV;
 
 import "reduction.m" : ReduceMestreConicAndQuartic;
 
-/*
-function CheapIntegerSquareFreePart(i : RationalPoint := true)
-    if not RationalPoint then
-	return i, 1;
-    end if;
-    Q := Factorization(i: ECMLimit := 10, MPQSLimit := 0);
-    _,af := Squarefree(Q);
-    a := FactorizationToInteger(af);
-    return i div a^2, a;
-end function;
-
-function CheapRationalSquareFreePart(r : RationalPoint := true)
-    an, bn := CheapIntegerSquareFreePart(Numerator(r): RationalPoint := RationalPoint);
-    ad, bd := CheapIntegerSquareFreePart(Denominator(r): RationalPoint := RationalPoint);
-    return an*ad, bn/(ad*bd);
-end function;
-
-// Find an affine point (x,y,1) on the projective conic L.
-function FindPointOnConic(L : RationalPoint := true)
-    K := BaseRing(Parent(L));
-    UP := PolynomialRing(K : Global := false); u := UP.1;
-    if Type(K) eq FldFin then
-	repeat
-	    x1 := Random(K); x3 := K!1;
-	    LL := Evaluate(L, [UP | x1,u,x3]);
-	    t, x2 := HasRoot(LL);
-	until t;
-	return x1,x2;
-    elif IsField(K)  then
-	P := ProjectiveSpace(K, 2);
-	x := P.1; y := P.2; z := P.3;
-	C := Conic(P, L);
-	if (Type(K) ne FldRat) or (not RationalPoint) or (not HasRationalPoint(C)) then
-	    LC,m := LegendreModel(C);
-	    LL := DefiningPolynomial(LC);
-	    i1 := K!Coefficient(LL,x,2);
-	    i2 := K!Coefficient(LL,y,2);
-	    i3 := K!Coefficient(LL,z,2);
-	    b1, a1 := CheapRationalSquareFreePart(-i3/i1 : RationalPoint := RationalPoint);
-	    b2, a2 := CheapRationalSquareFreePart(-i3/i2 : RationalPoint := RationalPoint);
-	    if Type(K) eq FldRat and Abs(b1) lt Abs(b2) then
-		if RationalPoint then
-		    S := QuadraticField(b1); b := S.1;
-		else
-		    S := ExtensionField<Rationals(), x | x^2-b1>; b := S.1;
-		end if;
-		Lsol := [a1*b, 0, 1];
-	    else
-		if RationalPoint then
-		    S := QuadraticField(b2); b := S.1;
-		else
-		    S := ExtensionField<K, x | x^2-b2>; b := S.1;
-		end if;
-		Lsol := [0, a2*b, 1];
-	    end if;
-	    sol := [Evaluate(p,Lsol) : p in DefiningPolynomials(Inverse(m))];
-	    return sol[1]/sol[3],sol[2]/sol[3];
-	else
-	    found := false;
-	    repeat
-		S := Reduction(Random(C));
-		if S[3] ne 0 then
-		    found := true;
-		else
-		    pol := Evaluate(L, [UP | S[1],S[2],u]); // pol = c*u*(u-t)
-		    if Coefficient(pol, 2) ne 0 then
-			s3 := -Coefficient(pol, 1)/Coefficient(pol, 2);
-			found := true;
-		    end if;
-		end if;
-	    until found;
-	    assert Evaluate(L, Eltseq(S)) eq 0;
-	    if S[3] eq 0 then
-		if s3 ne 0 then return S[1]/s3, S[2]/s3; end if;
-		// There is only one tangent line...
-                if S[1] eq 0 then
-                    pol := Evaluate(L, [UP | S[1]+u,S[2],u]); // pol = c*u*(u-t)
-                    s3 := -Coefficient(pol, 1)/Coefficient(pol, 2);
-                    error if s3 eq 0, "Error in FindPointOnConic";
-                    assert Evaluate(L, [S[1] + s3,S[2],s3]) eq 0;
-                    return (S[1] + s3)/s3, S[2]/s3;
-                else
-                    pol := Evaluate(L, [UP | S[1],S[2]+u,u]); // pol = c*u*(u-t)
-                    s3 := -Coefficient(pol, 1)/Coefficient(pol, 2);
-                    error if s3 eq 0, "Error in FindPointOnConic";
-                    assert Evaluate(L, [S[1],S[2] + s3,s3]) eq 0;
-                    return S[1], (S[2] + s3)/s3;
-                end if;
-	    else
-		return S[1]/S[3], S[2]/S[3];
-	    end if;
-	end if;
-    else
-	error "Algorithm not available for this type of field.\n";
-    end if;
-end function;
-*/
 
 function FindPointOnConic(L : RationalPoint := true, RandomLine := true, Legendre := false, B := 100)
     /* B is the maximal height of the integral coefficients of the intersecting line. */
@@ -374,29 +277,6 @@ function Genus3ConicAndQuartic(JI : models := true, RationalModel := true, Deter
 
     /* Computing conic and quartic */
     if models then
-
-/*
-	    xi, eta := FindPointOnConic(C : RationalPoint := RationalModel);
-
-	    QF := Parent(eta);
-
-	    if QF ne FF then
-		vprintf G3Twists, 1 : "Conic has no rational point\n";
-	    end if;
-	    P3 := PolynomialRing(QF, 3); x1 := P3.1; x2 := P3.2; x3 := P3.3;
-
-	    // "pt is "; [xi, eta, 1];
-	    // Evaluate(C, [xi, eta, 1]);
-
-	    pol := Evaluate(C,[xi + x2*x1, eta + x1,1]);
-
-
-	    a := Coefficient(pol,x1,2);
-	    b := Coefficient(pol,x1,1);
-	    // "param is", [xi*a-x2*b,a*eta-b,a];
-	    return UnivariatePolynomial(Evaluate(Q,[xi*a-x2*b,a*eta-b,a]));
-
-*/
 
 	phi := FindPointOnConic(C : RationalPoint := RationalModel, RandomLine := not Deterministic);
 

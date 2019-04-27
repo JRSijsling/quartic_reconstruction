@@ -380,7 +380,7 @@ end intrinsic;
 
 intrinsic WPSMultiply(Wght::SeqEnum, V::SeqEnum, lambda::.) -> SeqEnum
     {Scale a point in a weighted projective by a constant.}
-	
+
     require #V eq #Wght:    "Wght and V must have same length";
     require Type(Universe(Wght)) eq RngInt: "Wght  must contain integers";
 
@@ -389,11 +389,11 @@ end intrinsic;
 
 intrinsic WPSMinimize(Wght::SeqEnum, V::SeqEnum) -> SeqEnum
     {Compute a minimized representative of a points in a weighted projective
-    space (over the integers or the rationals only).} 
+    space (over the integers or the rationals only).}
 
     require #V eq #Wght:    "Wght, V1 and V2 must have same length";
     require Type(Universe(Wght)) eq RngInt: "Wght  must contain integers";
-    
+
     if Type(Universe(V)) eq RngInt then
 	return ChangeUniverse(
 	    WPSMinimize(ChangeUniverse(V, Rationals())),
@@ -407,13 +407,13 @@ intrinsic WPSMinimize(Wght::SeqEnum, V::SeqEnum) -> SeqEnum
     gcd_den := GCD([ Integers() ! Denominator(i) : i in V ]);
 
     primes := { fac[1] : fac in Factorization(gcd_den) cat Factorization(gcd_num) };
-    
+
     if #primes eq 0 then
         lambda := 1;
     else
         lambda := &*[ p^(Round(Maximum([ -Valuation(V[k], p)/Wght[k] : k in [1..#V] ]))) : p in primes ];
     end if;
-    
+
     return WPSMultiply(Wght, V, lambda), lambda;
-    
+
 end intrinsic;

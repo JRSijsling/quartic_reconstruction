@@ -701,28 +701,26 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
         vprint Reconstruction : "";
         vprintf Reconstruction : "Automorphism group D8 \n";
         aut := SmallGroup(8, 3);
-        /*
         if I12 ne 0 then
-            twists := [ TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point) ];
+            // twists := [ TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point) ];
+            twists := [ TernaryQuartic_D8(DO) ];
         else
             twists := [ TernaryQuartic_D8_I12eq0(DO) ];
         end if;
-        */
-        twists := [ TernaryQuartic_D8(DO) ];
+
 
     /* S3 */
     elif IsInStratumS3(DO) then
         vprint Reconstruction : "";
         vprintf Reconstruction : "Automorphism group S3 \n";
         aut := SmallGroup(6, 1);
-        /*
+
         if I12 ne 0 then
-            twists := [ TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point) ];
+            // twists := [ TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point) ];
+            twists := [ TernaryQuartic_S3(DO) ];
         else
             twists := [ TernaryQuartic_S3_I12eq0(DO) ];
         end if;
-        */
-        twists := [ TernaryQuartic_S3(DO) ];
 
     /*** Three dimensional case ***/
 
@@ -754,7 +752,7 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
         */
         twists := [ MinimizeReducePlaneQuartic(twist) : twist in twists ];
     end if;
-    /* Give variable names (bad practice)? */
-    R<x,y,z> := Parent(twists[1]);
+
     return twists[1], aut, twists;
+
 end intrinsic;

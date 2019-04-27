@@ -1,4 +1,6 @@
 .svn/*
+magma/.svn/*
+magma/g3twists_v2-0/.svn/*
 calculations/*
 experiments/*
 g2twists_v1-3/*

@@ -30,7 +30,7 @@ import "conic.m"       : FindPointOnConic;
 
    y^2 = a8 * x^8 + a6 * x^6 + a4 * x^4 + a2 * x^2 + a0;
 */
-function G3ModelsInCharFF_D4(JI : geometric := false, RationalModel := false)
+function G3ModelsInCharFF_D4(JI : geometric := false, RationalModel := true)
 
     vprintf G3Twists, 2 : "\n[G3Twists] D4: JI = %o\n", JI;
 

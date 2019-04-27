@@ -96,9 +96,9 @@
  * intrinsic MaedaInvariants(C::CrvHyp) -> SeqEnum
  *
  * intrinsic DiscriminantFromShiodaInvariants(JI::SeqEnum) -> BoolElt
- * intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := false) -> CrvHyp, GrpPerm
- * intrinsic HyperellipticPolynomialFromShiodaInvariants(JI::SeqEnum: RationalModel := false) -> SeqEnum, GrpPerm
- * intrinsic HyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum: RationalModel := false) -> SeqEnum, GrpPerm
+ * intrinsic HyperellipticCurveFromShiodaInvariants(JI::SeqEnum: RationalModel := true) -> CrvHyp, GrpPerm
+ * intrinsic HyperellipticPolynomialFromShiodaInvariants(JI::SeqEnum: RationalModel := true) -> SeqEnum, GrpPerm
+ * intrinsic HyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum: RationalModel := true) -> SeqEnum, GrpPerm
  *
  * intrinsic TwistedHyperellipticPolynomialsFromShiodaInvariants(JI::SeqEnum[FldFinElt]) -> SeqEnum[CrvHyp], GrpPerm
  * intrinsic TwistsFromShiodaInvariants(JI::SeqEnum[FldFinElt]) -> SeqEnum[CrvHyp], GrpPerm

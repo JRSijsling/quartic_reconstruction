@@ -131,38 +131,43 @@ function TernaryQuartic_S3_I12eq0(DO)
 end function;
 
 
-function TernaryQuartic_S3(I0)
+function TernaryQuartic_S3(D0)
 
-FF := Universe(I0);
-R<a,b> := RationalFunctionField(FF, 2);
-S := PolynomialRing(R, 3);
-x := S.1; y := S.2; z := S.3;
-f := x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
+    FF := Universe(D0);
+    R := RationalFunctionField(FF, 2); a := R.1; b := R.2;
+    S := PolynomialRing(R, 3); x := S.1; y := S.2; z := S.3;
 
-I, W := DixmierOhnoInvariants(f);
-inds := [ i : i in [1..#I] | I[i] ne 0 ];
-I := [ I[i] : i in inds ]; I0 := [ I0[i] : i in inds ]; W := [ W[i] : i in inds ];
-eqns1 := [ I[i] : i in [1..#I] | I0[i] eq 0 ];
+    f := x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
 
-inds := [ i : i in [1..#I] | I0[i] ne 0 ];
-I := [ I[i] : i in inds ]; I0 := [ I0[i] : i in inds ]; W := [ W[i] : i in inds ];
-I := WPSNormalize(W, I); I0 := WPSNormalize(W, I0);
-eqns2 := [ Numerator(I[i]) - I0[i]*Denominator(I[i]) : i in [1..#I] ];
-eqns := eqns1 cat eqns2;
+    I, W := DixmierOhnoInvariants(f);
+    inds := [ i : i in [1..#I] | I[i] ne 0 ];
+    I := [ I[i] : i in inds ]; I0 := [ D0[i] : i in inds ]; W := [ W[i] : i in inds ];
+    eqns1 := [ I[i] : i in [1..#I] | I0[i] eq 0 ];
 
-R := Parent(eqns2[1]);
-A := AffineSpace(R);
-Sch := Scheme(A, eqns);
-Pts := [ Eltseq(pt) : pt in Points(Sch) ];
-for Pt in Pts do
-    a, b := Explode(Pt);
-    if not (a eq 0 and b eq 0) then
-        S := PolynomialRing(FF, 3);
-        x := S.1; y := S.2; z := S.3;
-        f := x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
-        return f;
-    end if;
-end for;
+    inds := [ i : i in [1..#I] | I0[i] ne 0 ];
+    I := [ I[i] : i in inds ]; I0 := [ I0[i] : i in inds ]; W := [ W[i] : i in inds ];
+    I := WPSNormalize(W, I); I0 := WPSNormalize(W, I0);
+    eqns2 := [ Numerator(I[i]) - I0[i]*Denominator(I[i]) : i in [1..#I] ];
+
+    eqns := eqns1 cat eqns2;
+
+    A := AffineSpace(Parent(eqns2[1]));
+    Sch := Scheme(A, eqns);
+
+    Pts := Points(Sch); if #Pts eq 0 then Pts := PointsOverSplittingField(Sch); end if;
+
+    f := S!0;
+    for Pt in Pts do
+        a, b := Explode(Eltseq(Pt));
+        if not (a eq 0 and b eq 0) then
+            S := PolynomialRing(Ring(Universe(Pts)), 3);
+            x := S.1; y := S.2; z := S.3;
+            f := x^3*z + y^3*z + x^2*y^2 + a*x*y*z^2 + b*z^4;
+            break Pt;
+        end if;
+    end for;
+
+    return f;
 
 end function;
 
@@ -272,38 +277,44 @@ function TernaryQuartic_D8_I12eq0(DO)
 end function;
 
 
-function TernaryQuartic_D8(I0)
+function TernaryQuartic_D8(D0)
 
-FF := Universe(I0);
-R<a,b> := RationalFunctionField(FF, 2);
-S := PolynomialRing(R, 3);
-x := S.1; y := S.2; z := S.3;
-f := a*x^4 + y^4 + z^4 + b*x^2*y^2 + x*y*z^2;
+    FF := Universe(D0);
+    R := RationalFunctionField(FF, 2); a := R.1; b := R.2;
 
-I, W := DixmierOhnoInvariants(f);
-inds := [ i : i in [1..#I] | I[i] ne 0 ];
-I := [ I[i] : i in inds ]; I0 := [ I0[i] : i in inds ]; W := [ W[i] : i in inds ];
-eqns1 := [ I[i] : i in [1..#I] | I0[i] eq 0 ];
+    S := PolynomialRing(R, 3);
+    x := S.1; y := S.2; z := S.3;
+    f := a*x^4 + y^4 + z^4 + b*x^2*y^2 + x*y*z^2;
 
-inds := [ i : i in [1..#I] | I0[i] ne 0 ];
-I := [ I[i] : i in inds ]; I0 := [ I0[i] : i in inds ]; W := [ W[i] : i in inds ];
-I := WPSNormalize(W, I); I0 := WPSNormalize(W, I0);
-eqns2 := [ Numerator(I[i]) - I0[i]*Denominator(I[i]) : i in [1..#I] ];
-eqns := eqns1 cat eqns2;
+    I, W := DixmierOhnoInvariants(f);
+    inds := [ i : i in [1..#I] | I[i] ne 0 ];
+    I := [ I[i] : i in inds ]; I0 := [ D0[i] : i in inds ]; W := [ W[i] : i in inds ];
+    eqns1 := [ I[i] : i in [1..#I] | I0[i] eq 0 ];
 
-R := Parent(eqns2[1]);
-A := AffineSpace(R);
-Sch := Scheme(A, eqns);
-Pts := [ Eltseq(pt) : pt in Points(Sch) ];
-for Pt in Pts do
-    a, b := Explode(Pt);
-    if not (a eq 0 and b eq 0) then
-        S := PolynomialRing(FF, 3);
-        x := S.1; y := S.2; z := S.3;
-        f := a*x^4 + y^4 + z^4 + b*x^2*y^2 + x*y*z^2;
-        return f;
-    end if;
-end for;
+    inds := [ i : i in [1..#I] | I0[i] ne 0 ];
+    I := [ I[i] : i in inds ]; I0 := [ I0[i] : i in inds ]; W := [ W[i] : i in inds ];
+    I := WPSNormalize(W, I); I0 := WPSNormalize(W, I0);
+    eqns2 := [ Numerator(I[i]) - I0[i]*Denominator(I[i]) : i in [1..#I] ];
+
+    eqns := eqns1 cat eqns2;
+
+    A := AffineSpace(Parent(eqns2[1]));
+    Sch := Scheme(A, eqns);
+
+    Pts := Points(Sch); if #Pts eq 0 then Pts := PointsOverSplittingField(Sch); end if;
+    f := S!0;
+
+    for Pt in Pts do
+        a, b := Explode(Eltseq(Pt));
+        if not (a eq 0 and b eq 0) then
+            S := PolynomialRing(Ring(Universe(Pts)), 3);
+            x := S.1; y := S.2; z := S.3;
+            f := a*x^4 + y^4 + z^4 + b*x^2*y^2 + x*y*z^2;
+            break Pt;
+        end if;
+    end for;
+
+    return f;
 
 end function;
 
@@ -647,4 +658,3 @@ end if;
     return Dim3Model(a,b,c);
 
 end function;
-
