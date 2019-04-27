@@ -6,9 +6,7 @@ This repository contains Magma code for reconstructing plane quartic curves from
 Prerequisites
 --
 
-You need to have Magma installed on your machine to use this code. In addition, you can optionally install [`JRSijsling/quartic_isomorphisms`](https://github.com/JRSijsling/quartic_isomorphisms), after which you can uncomment the lines commented out by `Enable if you have quartic_isomorphisms` in `magma/DixmierOhnoToQuartic.m`.
-
-Finally, these algorithms use the Magma algorithm `MinimizeReducePlaneQuartic`, due to Elsenhans and Stoll, to simplify any output over the rationals. In order for this to work properly, one needs a bug fix of the file `magma/package/Geometry/SrfDP/`, which can be found in `BugFix.m`. Alternatively, it is possible to attach this new file separately.
+You need to have Magma installed on your machine to use this code. These algorithms use the Magma algorithm `MinimizeReducePlaneQuartic`, due to Elsenhans and Stoll, to simplify any output over the rationals. In order for this to work properly, one needs a bug fix of the file `magma/package/Geometry/SrfDP/`, which can be found in `BugFix.m`. Alternatively, it is possible to attach this new file separately.
 
 Installation
 --
