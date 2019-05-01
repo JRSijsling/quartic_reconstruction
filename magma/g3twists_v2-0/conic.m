@@ -232,7 +232,6 @@ function Genus3ConicAndQuartic(JI : models := true, RationalModel := true, Deter
             gcd_den := GCD([ Denominator(coeff) : coeff in Coefficients(C) ]);
             gcd_num := GCD([ Numerator(coeff) : coeff in Coefficients(C) ]);
             C *:= (gcd_den/gcd_num);
-            _<x1,x2,x3> := Parent(C);
 
             Q := Evaluate(Q, T);
             gcd_den := GCD([ Denominator(coeff) : coeff in Coefficients(Q) ]);
