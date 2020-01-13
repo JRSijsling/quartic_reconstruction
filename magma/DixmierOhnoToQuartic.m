@@ -737,6 +737,8 @@ intrinsic TernaryQuarticFromDixmierOhnoInvariants(DO::SeqEnum : exact := false, 
 
     /*** Otherwise (C2 or <Id>) ***/
     elif I12 ne 0 then
+        vprint Reconstruction : "";
+        vprintf Reconstruction : "Automorphism group trivial or C2\n";
         twists := [ TernaryQuarticFromDixmierOhnoInvariantsI12ne0(DO : exact := exact, minimize := minimize, descent := descent, search_point := search_point) ];
     end if;
 
