@@ -28,10 +28,11 @@ SetVerbose("ClusterReduction", 1);
 
 /* Start from a random ternary quartic */
 F := Rationals();  B := 2^10; Domain := [-B..B];
+//R<x> := PolynomialRing(Rationals()); F<r> := NumberField(x^2 - 2);  B := 2^3; Domain := [-B..B];
 //F := GF(NextPrime(10^5));  Domain := F;
 R<x1, x2, x3> := PolynomialRing(F, 3);
 repeat
-    f := &+[ Random(Domain)*mon : mon in MonomialsOfDegree(R, 4) ];
+    f := &+[ (F ! Random(Domain))*mon : mon in MonomialsOfDegree(R, 4) ];
     DOf, DOWght := DixmierOhnoInvariants(f);
 until DOf[#DOf] ne 0;
 

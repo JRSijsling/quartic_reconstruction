@@ -273,7 +273,7 @@ function Descent(f, b8 : Isomorphism := false, RandomCoboundary := true, SmallCo
             if &and( [ coeff in F : coeff in Coefficients(f0) ]) then break; end if;
         end for;
 
-        "...done";
+        vprint Reconstruction : "... done";
         return f0;
 
     end if;
