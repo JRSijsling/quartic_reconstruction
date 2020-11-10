@@ -91,6 +91,151 @@
 
 declare verbose IsGL2Equiv, 2;
 
+
+function HomFromRoot(K, L, rt)
+
+if Type(K) eq FldRat then
+    return hom< K -> L | >;
+else
+    return hom< K -> L | rt >;
+end if;
+
+end function;
+
+
+function ConjugateMatrix(h, A)
+
+return Matrix([ [ h(c) : c in Eltseq(row) ] : row in Rows(A) ]);
+
+end function;
+
+
+function ConjugatePolynomial(h, f)
+
+K := Codomain(h); R := PolynomialRing(K);
+return &+[ h(Coefficient(f, i))*R.1^i : i in [0..Degree(f)] ];
+
+end function;
+
+
+function PullbackPolynomial(h, f)
+
+if IsPrimeField(Domain(h)) or (Type(Domain(h)) eq FldFin) then
+    K := Domain(h); R := PolynomialRing(K);
+    return &+[ (K ! Coefficient(f, i))*R.1^i : i in [0..Degree(f)] ];
+end if;
+hi := Inverse(h); K := Codomain(hi); R := PolynomialRing(K);
+return &+[ hi(Coefficient(f, i))*R.1^i : i in [0..Degree(f)] ];
+
+end function;
+
+
+function CombineSplittingFields(K, L1, L2);
+
+if IsPrimeField(L1) and IsPrimeField(L2) then
+    L  := K;
+    h1 := hom< K -> L | >;
+    h2 := hom< K -> L | >;
+    h  := hom< K -> L | >;
+    return L, h1, h2, h;
+end if;
+
+if IsPrimeField(L1) then
+    L  := L2;
+    h1 := hom< L1 -> L | >;
+    h2 := hom< L2 -> L | L2.1 >;
+    h  := hom< K  -> L | >;
+    return L, h1, h2, h;
+end if;
+
+if IsPrimeField(L2) then
+    L  := L1;
+    h1 := hom< L1 -> L | L1.1 >;
+    h2 := hom< L2 -> L | >;
+    h  := hom< K  -> L | >;
+    return L, h1, h2, h;
+end if;
+
+/* Create inclusions of K */
+r1 := L1 ! K.1;
+r2 := L2 ! K.1;
+K1 := sub< L1 | r1 >;
+K2 := sub< L2 | r2 >;
+if IsPrimeField(K) then
+    h1 := hom< K -> K1 | >;
+    h2 := hom< K -> K2 | >;
+else
+    h1 := hom< K -> K1 | r1 >;
+    h2 := hom< K -> K2 | r2 >;
+end if;
+
+/* Create common splitting field */
+f1 := MinimalPolynomial(L1.1, K1);
+f2 := MinimalPolynomial(L2.1, K2);
+f1 := PullbackPolynomial(h1, f1);
+f2 := PullbackPolynomial(h2, f2);
+if Type(K) eq FldFin then
+    L := CommonOverfield(L1, L2);
+else
+    L := SplittingField([f1, f2]);
+end if;
+
+/* Inclusion of K */
+if IsPrimeField(K) then
+    h := hom< K -> L | >;
+else
+    h := hom< K -> L | L ! K.1 >;
+end if;
+
+/* Inclusion of L1 and L2 */
+f1 := ConjugatePolynomial(h, f1);
+f2 := ConjugatePolynomial(h, f2);
+h1 := hom< L1 -> L | Roots(f1)[1][1] >;
+h2 := hom< L2 -> L | Roots(f2)[1][1] >;
+
+/* Sanity check */
+assert h1(K.1) eq h2(K.1);
+assert Domain(h)  eq K ; assert Codomain(h)  eq L;
+assert Domain(h1) eq L1; assert Codomain(h1) eq L;
+assert Domain(h2) eq L2; assert Codomain(h2) eq L;
+assert MinimalPolynomial(K.1) eq MinimalPolynomial(h(K.1));
+assert MinimalPolynomial(L1.1) eq MinimalPolynomial(h1(L1.1));
+assert MinimalPolynomial(L2.1) eq MinimalPolynomial(h2(L2.1));
+return L, h1, h2, h;
+
+/* Final optional polredabs */
+/*
+if Type(L) eq FldNum then
+    L0, h0 := Polredabs(L);
+    return L0, h1*h0, h2*h0, h*h0;
+else
+    return L, h1, h2, h;
+end if;
+*/
+
+end function;
+
+
+function MakeRelativeFromRoot(K, L, r)
+
+if IsPrimeField(K) then
+    h := HomFromRoot(L, L, L.1);
+    return h;
+end if;
+KinL := sub< L | r >;
+h := HomFromRoot(K, KinL, r);
+f := MinimalPolynomial(L.1, KinL);
+f := PullbackPolynomial(h, f);
+Lrel := NumberField(f);
+h := HomFromRoot(L, Lrel, Lrel.1);
+ftest := MinimalPolynomial(Lrel.1, K) ;
+ftest /:= LeadingCoefficient(ftest);
+assert ftest eq f;
+return h;
+
+end function;
+
+
 function CovOrd4Deg2(F)
 
     f, d, n := Explode(F); n := IntegerRing()!n;
@@ -130,11 +275,13 @@ function CovOrd4Deg2(F)
 
 end function;
 
+
 function TransformPolynomial(f,n,mat)
     a,b,c,d := Explode(mat);
     x1 := a*Parent(f).1 + b; z1 := c*Parent(f).1 + d;
     return &+[Coefficient(f,i)*x1^i*z1^(n-i) : i in [0..n]];
 end function;
+
 
 function MyRandom(FF : BD := 7)
     if Characteristic(FF) eq 0 then
@@ -143,19 +290,10 @@ function MyRandom(FF : BD := 7)
     return Random(FF);
 end function;
 
-/*
-function GeometricRootsNew(f);
-    R := Parent(f); K := BaseRing(R);
-    S := PolynomialRing(K, 1);
-    h := hom< R -> S | S.1 >;
-    A := AffineSpace(S);
-    return [ pt[1] : pt in PointsOverSplittingField(Scheme(A, h(f))) ];
-end function;
-*/
 
-procedure GeometricRoots(f, ~LST : geometric := true, commonfield := false)
+procedure GeometricRoots(f, ~LST : commonfield := false)
 
-    vprintf IsGL2Equiv, 2 : "Working on %o\n", f;
+    vprintf IsGL2Equiv, 2 : "Working on the polynomial %o\n", f;
 
     /* Single splitting field extension */
     if commonfield then
@@ -167,34 +305,33 @@ procedure GeometricRoots(f, ~LST : geometric := true, commonfield := false)
     Q := CoefficientRing(f); X := Parent(f).1;
     g := f;
 
-
     Rts := Roots(f);
     for r in Rts do
 	Append(~LST, r[1]);
 	g := g div (X-r[1])^r[2] ;
     end for;
 
-    vprintf IsGL2Equiv, 2 : "Non rational part is %o\n", g;
+    vprintf IsGL2Equiv, 2 : "Non-rational part is %o\n", g;
 
     /* Repeated extension (by roots of polynomials over the original base field) */
-    if geometric eq true then
-	Fct := Factorization(g);
-	for fct in Fct do
-            vprintf IsGL2Equiv, 2 : "Factor = %o\n", fct;
-            $$(PolynomialRing(ext<Q | fct[1]>)!fct[1], ~LST : commonfield := commonfield);
-            //$$(PolynomialRing(SplittingField(fct[1]))!fct[1], ~LST : commonfield := commonfield);
-	end for;
-    end if;
-
+    Fct := Factorization(g);
+    for fct in Fct do
+        vprintf IsGL2Equiv, 2 : "Factor = %o\n", fct;
+        $$(PolynomialRing(ext<Q | fct[1]>)!fct[1], ~LST : commonfield := commonfield);
+        //$$(PolynomialRing(SplittingField(fct[1]))!fct[1], ~LST : commonfield := commonfield);
+    end for;
 end procedure;
 
+
 function CheckResult(MF, f, F, deg)
+/* Filter function: Returns those elements of MF that actually induce isomorphisms */
 
     RM := [* *];
     d := Max(Degree(f), Degree(F));
 
     for L in MF do
 
+        /* Check is done over the universe of the transformations */
 	FF := Parent(L[1]);
 
 	fp := PolynomialRing(FF)!f;
@@ -214,13 +351,14 @@ function CheckResult(MF, f, F, deg)
 end function;
 
 
-function IsGL2GeometricEquivalentAlphaEq0(_f, _F, d : geometric := true, commonfield := false)
+function IsGL2GeometricEquivalentAlphaEq0(_f, _F, d : commonfield := false)
 
-    Q := BaseRing(Parent(_f)); Z := PolynomialRing(Q).1;
+    Q := BaseRing(Parent(_f)); Q1 := Q.1;
+    Z := PolynomialRing(Q).1;
 
     if not IsInvertible(Q!d) then
         vprintf IsGL2Equiv, 1 : "Unable to invert the degree of the form in the field, I give up\n";
-        return true, [**];
+        return true, [* *], 1;
     end if;
 
     a0  := Coefficient(_f, 0); a1  := Coefficient(_f, 1);
@@ -231,7 +369,7 @@ function IsGL2GeometricEquivalentAlphaEq0(_f, _F, d : geometric := true, commonf
 
     if a0 eq 0 then
 	vprintf IsGL2Equiv, 1 : "a0 cannot be equal to zero with an isomorphism with diagonal 0\n";
-	return false, [**];
+	return false, [* *], 1;
     end if;
 
     EQ2 :=
@@ -251,22 +389,21 @@ function IsGL2GeometricEquivalentAlphaEq0(_f, _F, d : geometric := true, commonf
     if PG eq 0 then
 	vprintf IsGL2Equiv, 1 : "HUM... No algebraic condition found on beta, I give up\n";
 	vprintf IsGL2Equiv, 1 : "\n";
-	return true, [**];
+	return true, [* *], 1;
     end if;
 
     if Degree(PG) eq 0 then
 	vprintf IsGL2Equiv, 1 : "No such isomorphism possible\n";
 	vprintf IsGL2Equiv, 1 : "\n";
-	return false, [**];
+	return false, [* *], 1;
     end if;
 
-    GF := [* *]; GeometricRoots(PG, ~GF : geometric := geometric, commonfield := commonfield);
-    //GF := GeometricRootsNew(PG);
+    GF := [* *]; GeometricRoots(PG, ~GF : commonfield := commonfield);
 
-    ret := false; LST := [**];
+    ret := false; LST := [* *];
     for bet in GF do
 
-	vprintf IsGL2Equiv, 1 : "handling RootOf(%o)\n", MinimalPolynomial(bet);
+	vprintf IsGL2Equiv, 1 : "Handling RootOf(%o)\n", MinimalPolynomial(bet);
 
 	EF := Parent(bet);
 	Z := PolynomialRing(EF).1;
@@ -278,16 +415,8 @@ function IsGL2GeometricEquivalentAlphaEq0(_f, _F, d : geometric := true, commonf
 	RM := CheckResult([* L *], _f, _F, d);
 
 	if #RM ne 0 then
-
 	    LF := RM[1];
 
-	    FF := Q;
-            /*
-	    if Parent(LF[1]) ne FF then
-		FF := sub< Parent(LF[1]) | LF>;
-		LF := [FF!l : l in LF];
-	    end if;
-            */
 	    if Index(LST, LF) eq 0 then
 	        vprintf IsGL2Equiv, 1 :  "%o\n", LF;
 		Append(~LST, LF);
@@ -298,18 +427,54 @@ function IsGL2GeometricEquivalentAlphaEq0(_f, _F, d : geometric := true, commonf
 	ret or:= #RM ne 0;
     end for;
 
-    return ret, LST;
+    /* Terminate early without further improvements */
+    if ret then
+        L := Parent(LST[1][1]);
+        Q1 := L ! Q1;
+    end if;
+
+    return ret, LST, Q1;
+
+    /* Keep only those elements that work */
+    if ret then
+        LST := CheckResult(LST, _f, _F, d);
+    end if;
+
+    /* Make field smaller */
+    if ret and commonfield then
+        L := Parent(LST[1][1]);
+        Q1 := L ! Q1;
+        if IsPrimeField(L) then
+            L0 := L;
+        else
+            L0 := sub< L | [ Q1 ] cat &cat[ lst : lst in LST ] >;
+        end if;
+        LST := [* [ L0 ! c : c in lst ] : lst in LST *];
+        Q1 := L0 ! Q1;
+    end if;
+
+    /* Make field even smaller */
+    /*
+    if ret and commonfield and Type(L0) eq FldNum then
+        L00, h := Polredabs(L0);
+        LST := [* [ h(c) : c in lst ] : lst in LST *];
+        Q1 := h(Q1);
+    end if;
+    */
+
+    return ret, LST, Q1;
 
 end function;
 
-function IsGL2GeometricEquivalentHeart(_f, _F, deg : geometric := true, commonfield := false)
 
-    Q := BaseRing(Parent(_f));
+function IsGL2GeometricEquivalentHeart(_f, _F, deg : commonfield := false)
+
+    Q := BaseRing(Parent(_f)); Q1 := Q.1;
     Z := Parent(_f).1;
 
     if not IsInvertible(Q!deg) then
         vprintf IsGL2Equiv, 1 : "Unable to invert the degree of the form in the field, I give up\n";
-        return true, [**];
+        return true, [* *], 1;
     end if;
 
     P1 := ProjectiveSpace(Q, 1);
@@ -374,7 +539,7 @@ function IsGL2GeometricEquivalentHeart(_f, _F, deg : geometric := true, commonfi
 	if Degree(EQ1) eq -1 then
 	    vprintf IsGL2Equiv, 1 : "No algebraic condition given by the first equation, I give up\n";
 	    vprintf IsGL2Equiv, 1 : "\n";
-	    return true, [**];
+	    return true, [* *];
 	end if;
 */
     end if;
@@ -401,19 +566,18 @@ vprintf IsGL2Equiv, 1 : "EQ2 is of degree %o\n", Degree(EQ2);
     if PG eq 0 then
 	vprintf IsGL2Equiv, 1 : "No algebraic condition found on gamma, I give up\n";
 	vprintf IsGL2Equiv, 1 : "\n";
-	return true, [**];
+	return true, [* *], 1;
     end if;
 
     if Degree(PG) eq 0 then
 	vprintf IsGL2Equiv, 1 : "No such isomorphism possible\n";
 	vprintf IsGL2Equiv, 1 : "\n";
-	return false, [**];
+	return false, [* *], 1;
     end if;
 
-    GF := [* *]; GeometricRoots(PG, ~GF : geometric := geometric, commonfield := commonfield);
-    //GF := GeometricRootsNew(PG);
+    GF := [* *]; GeometricRoots(PG, ~GF : commonfield := commonfield);
 
-    LST := [**];
+    LST := [* *];
     for m21 in GF do
 
 	EF := Parent(m21); Z := PolynomialRing(EF).1;
@@ -431,7 +595,7 @@ vprintf IsGL2Equiv, 1 : "EQ2 is of degree %o\n", Degree(EQ2);
 
 	if Evaluate(Derivative(F1, 1, X), [1, m21]) eq 0 then
 	    vprintf IsGL2Equiv, 1 : "HUM the derivative in m21 = 0, I give up\n";
-	    return true, [**];
+	    return true, [* *], 1;
 	end if;
 
 	m12 := - Evaluate(Derivative(F1, 1, Y), [1, m21]) / Evaluate(Derivative(F1, 1, X), [1, m21]);
@@ -453,7 +617,7 @@ vprintf IsGL2Equiv, 1 : "EQ2 is of degree %o\n", Degree(EQ2);
 	    bp1 := MonomialCoefficient(F2, X^(i+1)*Y^(deg-i-1));
 
 	    if am1*ap1*bm0^2 - bm1*bp1*am0^2 ne 0 then
-		vprintf IsGL2Equiv, 1 : "bad compatibility conditions I ? I give up\n";
+		vprintf IsGL2Equiv, 1 : "Bad compatibility conditions 1? I give up\n";
 		continue m21;
 	    end if;
 
@@ -464,7 +628,7 @@ vprintf IsGL2Equiv, 1 : "EQ2 is of degree %o\n", Degree(EQ2);
 	g, U := XGCD(degs);
 	if g ne 1 then
 	    vprintf IsGL2Equiv, 1 : "HUM g =  %o\n", g;
-	    //		return [**];
+	    //		return [* *];
 	end if;
 
 	/* Are there corresponding coefficients in g1 non-zero ? */
@@ -475,7 +639,7 @@ vprintf IsGL2Equiv, 1 : "EQ2 is of degree %o\n", Degree(EQ2);
 		(MonomialCoefficient(g1, X^(deg-d)*Y^d) ne 0 and
 		MonomialCoefficient(F2, X^(deg-d)*Y^d) eq 0)) then
 
-		vprintf IsGL2Equiv, 1 : "bad compatibility conditions II ? I give up\n";
+		vprintf IsGL2Equiv, 1 : "Bad compatibility conditions 2? I give up\n";
 		vprintf IsGL2Equiv, 1 : "F2 = %o\n", F2;
 		vprintf IsGL2Equiv, 1 : "g1 = %o\n", g1;
 		continue m21;
@@ -490,7 +654,7 @@ vprintf IsGL2Equiv, 1 : "EQ2 is of degree %o\n", Degree(EQ2);
 	    &*[ MonomialCoefficient(g1, X^(deg-degs[j])*Y^degs[j])^U[j]: j in [1..#degs]];
 
 	vprintf IsGL2Equiv, 1 : "R = %o\n", R;
-	RR := [* *]; GeometricRoots(Z^g - R, ~RR : geometric := geometric, commonfield := commonfield);
+	RR := [* *]; GeometricRoots(Z^g - R, ~RR : commonfield := commonfield);
 
 	vprintf IsGL2Equiv, 1 : "F2 = %o\n", F2;
 	vprintf IsGL2Equiv, 1 : "g1 = %o\n", g1;
@@ -512,12 +676,6 @@ vprintf IsGL2Equiv, 1 : "EQ2 is of degree %o\n", Degree(EQ2);
 
 	    if #RM ne 0 then
 
-               /*
-	       if Parent(LF[1]) ne FF then
-	          FF := sub< Parent(LF[1]) | LF>;
-		  LF := [FF!l : l in LF];
-	       end if;
-               */
 	       if Index(LST, LF) eq 0 then
 	          vprintf IsGL2Equiv, 1 : "%o\n", LF;
 		  Append(~LST, LF);
@@ -529,70 +687,200 @@ vprintf IsGL2Equiv, 1 : "EQ2 is of degree %o\n", Degree(EQ2);
 
     end for;
 
-    return #LST ne 0, LST;
+    ret := #LST ne 0;
+    /* Terminate early without further improvements */
+    if ret then
+        L := Parent(LST[1][1]);
+        Q1 := L ! Q1;
+    end if;
+    return ret, LST, Q1;
+
+    /* Keep only those elements that work */
+    if ret then
+        LST := CheckResult(LST, _f, _F, deg);
+    end if;
+
+    /* Make field smaller */
+    if ret and commonfield then
+        L := Parent(LST[1][1]);
+        Q1 := L ! Q1;
+        if IsPrimeField(L) then
+            L0 := L;
+        else
+            L0 := sub< L | [ Q1 ] cat &cat[ lst : lst in LST ] >;
+        end if;
+        LST := [* [ L0 ! c : c in lst ] : lst in LST *];
+        Q1 := L0 ! Q1;
+    end if;
+
+    /* Make field even smaller */
+    /*
+    if ret and commonfield and Type(L0) eq FldNum then
+        L00, h := Polredabs(L0);
+        LST := [* [ h(c) : c in lst ] : lst in LST *];
+        Q1 := h(Q1);
+    end if;
+    */
+
+    return ret, LST, Q1;
 
 end function;
 
-function IsGL2GeometricEquivalentMain(_f, _F, deg : geometric := true, commonfield := false)
 
-    PX := Parent(_f);
+function IsGL2GeometricEquivalentMain(_f, _F, deg : commonfield := false)
+
+    PX := Parent(_f); Q := BaseRing(PX);
 
     vprintf IsGL2Equiv, 1 : "\n\n";
     vprintf IsGL2Equiv, 1 : "------------------------------\n";
     vprintf IsGL2Equiv, 1 : " f = %o\n", _f;
     vprintf IsGL2Equiv, 1 : " F = %o\n", _F;
 
-    ret, MF0 := IsGL2GeometricEquivalentAlphaEq0(_f, _F, deg : geometric := geometric, commonfield := commonfield);
-    /* ??? */
-    if ret eq true and #MF0 eq 0 then
-	return ret, MF0;
+    /* Special case: alpha equals zero */
+    ret0, MF0, Q10 := IsGL2GeometricEquivalentAlphaEq0(_f, _F, deg : commonfield := commonfield);
+    if ret0 and #MF0 eq 0 then
+	return ret0, MF0, [* *];
     end if;
 
     vprintf IsGL2Equiv, 1 : "After the Alpha = 0 step\n";
-    vprintf IsGL2Equiv, 1 : "ret = %o, MF = %o\n", ret, MF0;
+    vprintf IsGL2Equiv, 1 : "ret = %o, MF = %o\n", ret0, MF0;
 
-    retp, MFp := IsGL2GeometricEquivalentHeart(_f, _F, deg : geometric := geometric, commonfield := commonfield);
-    /* ??? */
-    if retp eq true and #MFp eq 0 then
-        return retp, MFp;
+    /* Generic case */
+    retp, MFp, Q1p := IsGL2GeometricEquivalentHeart(_f, _F, deg : commonfield := commonfield);
+    if retp and #MFp eq 0 then
+        return retp, MFp, [* *];
     end if;
 
-    if commonfield then
-        Fields := [**]; for Iso in MF0 cat MFp do
-            if Index(Fields, Universe(Iso)) eq 0 then Append(~Fields, Universe(Iso)); end if;
-        end for;
-        if #Fields ne 1 then
-            /* ??? */
-            K, Rs := SplittingField([DefiningPolynomial(K) : K in Fields]);
-            "... splitting done\n";
-            PHIs := [hom< Fields[i]->K | Rs[i][1] > : i in [1..#Fields]];
-        else
+    ret := ret0 or retp;
+    MFL := [* MF0, MFp *];
+    Q1L := [* Q10, Q1p *];
 
-        end if;
-    end if;
-
-    MF := [**];
-    for L in MF0 cat MFp do
-        _L := L;
-        if commonfield and #Fields ne 1 then
-            _L :=  [ PHIs[Index(Fields, Universe(L))](l) : l in L];
-        end if;
-        if Index(MF, _L) eq 0 then Append(~MF, _L); end if;
-    end for;
-
-    ret or:= retp;
-
-    return ret, MF;
+    return ret, MFL, Q1L;
 end function;
 
 
-intrinsic IsGL2GeometricEquivalent(_f::RngUPolElt, _F::RngUPolElt, deg::RngIntElt: geometric := true, commonfield := false) -> BoolElt, SeqEnum
-    {}
+function CheckNormalizeToCommonBase(ret, MFL, Q1L, _f, _F, deg : commonfield := false);
 
-    Q := BaseRing(Parent(_f));
+Q := BaseRing(Parent(_f));
+/* Throw away irrelevant entries */
+ks := [ k : k in [1..#MFL] | #MFL[k] ne 0 ];
+MFL := [* MFL[k] : k in ks *]; Q1L := [* Q1L[k] : k in ks *];
+assert ret eq (#MFL ne 0);
+if #MFL eq 0 then
+    return false, [ ];
+end if;
 
-    ret := true; MF := [**];
+/* Throw away non-solutions */
+MFL := [* CheckResult(MF, _f, _F, deg) : MF in MFL *];
+ks := [ k : k in [1..#MFL] | #MFL[k] ne 0 ];
+MFL := [* MFL[k] : k in ks *]; Q1L := [* Q1L[k] : k in ks *];
+if #MFL eq 0 then
+    return false, [ ];
+end if;
 
+/* Normalize */
+MFL0 := [ ];
+for MF in MFL do
+    MF0 := [* *];
+    for mf in MF do
+        i0 := Minimum([ i : i in [1..#mf] | mf[i] ne 0 ]);
+        mf0 := [ c/i0 : c in mf ];
+        Append(~MF0, mf0);
+    end for;
+    Append(~MFL0, MF0);
+end for;
+MFL := MFL0;
+
+/* Make the individual fields small */
+if commonfield then
+    MFL0 := [ ]; Q1L0 := [* *];
+    for i in [1..#MFL] do
+        /* Make field smaller */
+        MF := MFL[i]; Q1 := Q1L[i];
+        L := Parent(MF[1][1]);
+        if IsPrimeField(L) then
+            L0 := L;
+        else
+            L0 := sub< L | [ Q1 ] cat &cat[ mf : mf in MF ] >;
+        end if;
+        MF0 := [* [ L0 ! c : c in mf ] : mf in MF *];
+        Q10 := L0 ! Q1;
+        Append(~MFL0, MF0); Append(~Q1L0, Q10);
+
+        /* Make field even smaller */
+        /*
+        L00, h := Polredabs(L0);
+        MF00 := [* [ h(c) : c in mf ] : mf in MF0 *];
+        Q100 := h(Q10);
+        Append(~MFL0, MF00); Append(~Q1L0, Q100);
+        */
+    end for;
+    MFL := MFL0; Q1L := Q1L0;
+end if;
+
+/* Merge the solutions */
+if not commonfield then
+    if #MFL eq 1 then
+        MF := MFL[1];
+    else
+        MF := MFL[1] cat MFL[2];
+    end if;
+else
+    if #MFL eq 1 then
+        MF := MFL[1];
+    else 
+        L1 := Parent(MFL[1][1][1]); Q1 := Q1L[1]; assert Q1 in L1;
+        L2 := Parent(MFL[2][1][1]); Q2 := Q1L[1]; assert Q2 in L2;
+        L, h1, h2, h := CombineSplittingFields(Q, L1, L2);
+        Q1L := [ h(Q.1) ];
+        MF1 := [* [ h1(c) : c in M ] : M in MFL[1] *];
+        MF2 := [* [ h2(c) : c in M ] : M in MFL[2] *];
+        MF := MF1 cat MF2;
+    end if;
+end if;
+
+/* Make the field small again */
+/*
+if commonfield then
+    L := Universe(MF[1]); Q1 := Q1L[1];
+    if IsPrimeField(L) then
+        L0 := L;
+    else
+        L0 := sub< L | [ Q1 ] cat &cat[ mf : mf in MF ] >;
+    end if;
+    MF0 := [* [ L0 ! c : c in mf ] : mf in MF *];
+    Q10 := L0 ! Q1;
+    MF := MF0; Q1L := [ Q10 ];
+end if;
+*/
+
+/* Make field even smaller */
+/*
+if commonfield then
+    L00, h := Polredabs(L0);
+    MF00 := [* [ h(c) : c in mf ] : mf in MF0 *];
+    Q100 := h(Q10);
+    MF := MF00; Q1 := [ Q100 ];
+end if;
+*/
+
+/* Make the field relative */
+if commonfield and Type(L) eq FldNum then
+    h := MakeRelativeFromRoot(Q, L, Q1L[1]);
+    MF := [ [ h(c) : c in M ] : M in MF ];
+end if;
+
+ret := #MF ne 0; assert ret;
+return ret, MF;
+
+end function;
+
+
+function IsGL2GeometricEquivalentCandidates(_f, _F, deg : covariant := true, commonfield := false)
+
+Q := BaseRing(Parent(_f));
+
+if covariant then
     /* Covariant reduction, when possible */
     p := Characteristic(Q) eq 0 select Infinity() else Characteristic(Q);
 
@@ -600,81 +888,96 @@ intrinsic IsGL2GeometricEquivalent(_f::RngUPolElt, _F::RngUPolElt, deg::RngIntEl
        Degree(_F) gt 4 and Degree(_F) lt p then
 
         vprintf IsGL2Equiv, 1 : "Covariant reduction step\n";
-	Cf := CovOrd4Deg2([* _f, 1, deg *])[1];
-	CF := CovOrd4Deg2([* _F, 1, deg *])[1];
+        Cf := CovOrd4Deg2([* _f, 1, deg *])[1];
+        CF := CovOrd4Deg2([* _F, 1, deg *])[1];
 
-	if Degree(Cf) ge 3 and Discriminant(Cf) ne 0 and
-	    Degree(CF) ge 3 and Discriminant(CF) ne 0 then
+        if Degree(Cf) ge 3 and Discriminant(Cf) ne 0 and
+            Degree(CF) ge 3 and Discriminant(CF) ne 0 then
 
-	    ret, MF := $$(Cf, CF, 4 : geometric := geometric, commonfield := commonfield);
-	    return ret, CheckResult(MF, _f, _F, deg);
+            ret, MFL, Q1L := $$(Cf, CF, 4 : commonfield := commonfield);
+            if not (ret eq true and #MFL eq 0) then
+                return ret, MFL, Q1L;
+            end if;
 
-	end if;
+        end if;
     else
         vprintf IsGL2Equiv, 1 : "Covariant reduction is not possible\n";
     end if;
+end if;
 
-    /* Main algorithm */
-    nbtry := 0;
-    while ret eq true and #MF eq 0 and nbtry lt 10 do
+/* Main algorithm */
+nbtry := 0; ret := true; MFL := [* *];
+while ret eq true and #MFL eq 0 and nbtry lt 20 do
+    nbtry +:= 1; f := _f; F := _F; ML := IdentityMatrix(Q, 2);
 
-	nbtry +:= 1;
+    if nbtry ne 1 then
+        repeat
+            ML := Matrix(2, 2, [Q | MyRandom(Q : BD := Degree(_f)+1) : i in [1..4]]);
+        until &*Eltseq(ML) ne 0 and Determinant(ML) ne 0;
+        f := TransformPolynomial(_f, deg, Eltseq(ML));
+        F := TransformPolynomial(_F, deg, Eltseq(ML));
+    end if;
 
-        f := _f; F := _F; ML := IdentityMatrix(Q, 2);
-        if nbtry ne 1 then
-            repeat
-                ML := Matrix(2, 2, [Q | MyRandom(Q : BD := Degree(_f)+1) : i in [1..4]]);
-            until &*Eltseq(ML) ne 0 and Determinant(ML) ne 0;
-            f  := TransformPolynomial(_f, deg, Eltseq(ML));
-            F  := TransformPolynomial(_F, deg, Eltseq(ML));
+    vprintf IsGL2Equiv, 1 : "ML is %o\n", ML;
+
+    if Degree(f) ne deg or Degree(F) ne deg then continue; end if;
+    MLi := ML^(-1);
+
+    ret, MFL, Q1L := IsGL2GeometricEquivalentMain(f, F, deg : commonfield := commonfield);
+    /* Throw away irrelevant entries */
+    ks := [ k : k in [1..#MFL] | #MFL[k] ne 0 ];
+    MFL := [* MFL[k] : k in ks *]; Q1L := [* Q1L[k] : k in ks *];
+
+    /* Convert to matrices, conjugate, and convert back */
+    MFML := [* [* Matrix(2, 2, A) : A in MF *] : MF in MFL *];
+    MFL := [* *];
+    for i in [1..#MFML] do
+        L := BaseRing(MFML[i][1]);
+        if commonfield then
+            h := HomFromRoot(Q, L, Q1L[i]);
+            T := ConjugateMatrix(h, ML);
+            Ti := ConjugateMatrix(h, MLi);
+        else
+            /* This probably also works in commonfield case */
+            T := Matrix(L, 2, 2, Eltseq(ML));
+            Ti := Matrix(L, 2, 2, Eltseq(MLi));
         end if;
+        Append(~MFL, [* T*A*Ti : A in MFML[i] *]);
+    end for;
+    MFL := [* [* Eltseq(A) : A in MF *] : MF in MFL *];
 
-        vprintf IsGL2Equiv, 1 : "ML is %o\n", ML;
-
-	if Degree(f) ne deg or Degree(F) ne deg then continue; end if;
-
-        MLi := ML^(-1);
-
-	ret, MFp := IsGL2GeometricEquivalentMain(f, F, deg : geometric := geometric, commonfield := commonfield);
-
-	MF := [* *];
-        for LF in MFp do
-            M := Matrix(2, 2, LF);
-            /* The test cannot fail, but the "IsSubfield" call is necessary
-               to make (sometimes) Q recognize as a subfield of CoefficientRing(M) */
-            if not IsSubfield(Q, CoefficientRing(M)) then
-                ret := false; break;
-            end if;
-            TM := ML * M * MLi;
-	    if TM[1, 1] ne 0 then TM /:= TM[1, 1]; end if;
-	    Append(~MF, Eltseq(TM));
-	end for;
-
-    end while;
-
-    /* Classical one in the very rare cases where nothing else was possible
-       (this may happen on very small finite fields) */
-    if (ret eq true and #MF eq 0) and geometric then
-	SF := Compositum(SplittingField(_f), SplittingField(_F));
-	ret, MF := IsGL2Equivalent(PolynomialRing(SF)!_f, PolynomialRing(SF)!_F, deg);
+    /* Return if problem case not encountered */
+    if not (ret eq true and #MFL eq 0) then
+        return ret, MFL, Q1L;
     end if;
 
-    if geometric then
-        return ret, MF;
-    end if;
+end while;
 
-    /*
-    if geometric then
-        if ret and (Type(Q) eq FldRat) then
-            L := Universe(MF[1]);
-            L0, h := Polredabs(L);
-            MF := [ [ h(c) : c in mf ] : mf in MF ];
-        end if;
-        return ret, MF;
-    end if;
-    */
+/* Classical one in the very rare cases where nothing else was possible
+   (this may happen by accident and over small finite fields) */
+if Type(Q) eq FldFin then
+    L := SplittingField(_f*_F);
+else
+    L := SplittingField([_f, _F]);
+end if;
+ret, MF := IsGL2Equivalent(PolynomialRing(L)!_f, PolynomialRing(L)!_F, deg);
+MFL := [* MF *]; Q1L := [* L ! Q.1 *];
+return ret, MFL, Q1L;
 
-    /* Non-geometric case */
+end function;
+
+
+intrinsic IsGL2GeometricEquivalent(_f::RngUPolElt, _F::RngUPolElt, deg::RngIntElt: geometric := true, covariant := true, commonfield := false) -> BoolElt, SeqEnum
+{Returns a boolean and sequences [a,b,c,d].}
+
+/* Is this fast? Replace? */
+if not geometric then
     return IsGL2Equivalent(_f, _F, deg);
+end if;
+
+/* Refer and normalize back */
+ret, MFL, Q1L := IsGL2GeometricEquivalentCandidates(_f, _F, deg : covariant := covariant, commonfield := commonfield);
+
+return CheckNormalizeToCommonBase(ret, MFL, Q1L, _f, _F, deg : commonfield := commonfield);
 
 end intrinsic;
