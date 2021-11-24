@@ -3,10 +3,12 @@ Description
 
 This repository contains Magma code for reconstructing plane quartic curves from their Dixmier--Ohno invariants.
 
+Please try using [`JRSijsling/quartic`](https://github.com/JRSijsling/quartic) instead whenever possible: This packages supersedes the current one.
+
 Prerequisites
 --
 
-You need to have Magma installed on your machine to use this code. These algorithms use the Magma algorithm `MinimizeReducePlaneQuartic`, due to Elsenhans and Stoll, to simplify any output over the rationals. In order for this to work properly, one needs a bug fix of the file `magma/package/Geometry/SrfDP/`, which can be found in `BugFix.m`. Alternatively, it is possible to attach this new file separately.
+You need to have Magma installed on your machine to use this code. These algorithms use the Magma algorithm `MinimizeReducePlaneQuartic`, due to Elsenhans and Stoll, to simplify any output over the rationals. In order for this to work properly, one needs a bug fix of a function at the end of the file `magma/package/Geometry/SrfDP/mindred.m`, which can be found in `BugFix.m`. Alternatively, it is possible to attach this new file separately.
 
 Installation
 --
